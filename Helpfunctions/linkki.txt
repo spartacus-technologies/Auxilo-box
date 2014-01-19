@@ -1,0 +1,2 @@
+// http://linux.die.net/man/3/popen
+	// http://stackoverflow.com/questions/478898/how-to-execute-a-command-and-get-output-of-command-within-c/479103#479103

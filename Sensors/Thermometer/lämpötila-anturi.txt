@@ -1,0 +1,12 @@
+http://raspberrywebserver.com/gpio/connecting-a-temperature-sensor-to-gpio.html
+
+kernel moduulit käynnistyksen yhteyteen:
+sudo echo “w1-gpio” >> /etc/modules
+sudo echo “w1-therm” >> /etc/modules
+
+Note: 	Pitkässä ajossa anturi antaa ajoittain (<1/1000 lukua) virheellisiä lukemia (-0.068C).
+		Tähän voisi keksiä ratkaisuksi vaikka uuden arvon lukemisen virheellisen
+		arvon ilmetessä (esim. poikkeama edelliseen arvoon >5C)
+		-Eetu
+
+

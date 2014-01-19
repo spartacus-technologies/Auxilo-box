@@ -1,0 +1,7 @@
+http://raspberrywebserver.com/gpio/connecting-a-temperature-sensor-to-gpio.html
+
+kernel moduulit käynnistyksen yhteyteen:
+sudo echo “w1-gpio” >> /etc/modules
+sudo echo “w1-therm” >> /etc/modules
+
+

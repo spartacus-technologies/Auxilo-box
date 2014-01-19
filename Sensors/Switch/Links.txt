@@ -1,0 +1,7 @@
+https://projects.drogon.net/raspberry-pi/wiringpi/functions
+
+Headers:
+int wiringPiISR (int pin, int edgeType,  void (*function)(void)) ;
+
+Concurrent Processing (multi-threading)
+	int piThreadCreate (name) ;
