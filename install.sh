@@ -24,11 +24,12 @@ vlc_installed=$(apt-cache policy vlc | grep "none")
 energ_installed=$(apt-cache policy sispmctl | grep "none")
 boost_installed=$(apt-cache policy libboost-all-dev | grep "none")
 protobuf_installed=$(apt-cache policy libprotobuf-dev | grep "none")
+protobufcompiler_installed=$(apt-cache policy protobuf-compiler | grep "none")
 cmake_installed=$(apt-cache policy cmake | grep "none")
 
 
 # Install necessary programs and libraries
-if [[ -n "$vlc_installed" || -n "$energ_installed" || -n "$boost_installed" || -n "$protobuf_installed" ]]; then
+if [[ -n "$vlc_installed" || -n "$energ_installed" || -n "$boost_installed" || -n "$protobuf_installed" || -n "$protobufcompiler_installed" ]]; then
 
 	# check if connected to internet
 	echo "Checking internet connection..."
@@ -103,6 +104,21 @@ if [[ -n "$vlc_installed" || -n "$energ_installed" || -n "$boost_installed" || -
 		protobuf_installed=$(apt-cache policy libprotobuf-dev | grep "none")
 		if [[ -n "$protobuf_installed" ]]; then
 			echo "Protobuf installation failed!!"
+			exit 1
+		else
+			echo "Done"
+		fi
+	fi
+
+	if [[ -n "$protobufcompiler_installed" ]]; then
+		echo "Installing protobuf compiler"
+		apt-get -y install protobuf-compiler  > /dev/null 2>&1 &	
+	
+		wait_process
+
+		protobufcompiler_installed=$(apt-cache policy protobuf-compiler | grep "none")
+		if [[ -n "$protobufcompiler_installed" ]]; then
+			echo "Protobuf compiler installation failed!!"
 			exit 1
 		else
 			echo "Done"
@@ -192,7 +208,10 @@ errors=$(echo -e "$(cat output.txt)" | grep "Error")
 
 
 if [[ -n "$errors" ]]; then
-	echo $errors
+	echo -e "\n \nThere were errors: "
+	echo "$errors"
+	echo -e "\nMore details in file \"output.txt\""
+	echo -e "\n \nContact devteam."
 	exit 1
 fi
 
@@ -200,13 +219,12 @@ make > output.txt 2>&1 &
 
 wait_process
 
-errors=$(echo -e "$(cat output.txt)" | grep "error")
-
+errors=$(grep 'Error\|error\|Fatal' output.txt)
 
 if [[ -n "$errors" ]]; then
-	
 	echo -e "\n \n There were errors: "
-	echo $errors
+	echo "$errors"
+	echo -e "\nMore details in file \"output.txt\""
 	echo -e "\n \nContact devteam."
 	exit 1
 fi

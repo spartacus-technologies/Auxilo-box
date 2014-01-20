@@ -96,9 +96,6 @@ set(DEVICES_SRCS
 
 # add_library(util ${UTIL_SRC})
 
-
-cmake_minimum_required (VERSION 2.6)
-
 # List of protobuf .proto's
 set(LIBNETWORK_PROTOS
     Communications/protocol.proto
@@ -123,17 +120,14 @@ set(LIBNETWORK_SRCS
 # Protobuf generation
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${LIBNETWORK_PROTOS})
 
+
 add_library(network ${LIBNETWORK_SRCS} ${PROTO_SRCS} ${PROTO_HDRS})
-
-
-# add_library(box ${BOX_SRCS})
 add_library(sensors ${SENSORS_SRCS})
 add_library(nexa ${NEXA_SRCS})
 add_library(devices ${DEVICES_SRCS})
-	#add_library(communications ${COMM_SRCS})
+
 
 #add_subdirectory(Communications)
-
 #include_directories(Communications)
 
 add_executable(demo demo.cpp)
@@ -145,6 +139,7 @@ add_executable(nexa_pair nexa_pair.cpp)
 
 target_link_libraries(demo sensors)
 target_link_libraries(demo nexa)
+target_link_libraries(demo network)
 
 target_link_libraries(nexa_pair nexa)
 

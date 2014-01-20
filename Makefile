@@ -39,10 +39,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/boksi/erno_vesa_boksi_demo/Source
+CMAKE_SOURCE_DIR = /home/pi/Boksi/auxilo-box
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/boksi/erno_vesa_boksi_demo/Source
+CMAKE_BINARY_DIR = /home/pi/Boksi/auxilo-box
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -79,9 +79,9 @@ test/fast: test
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/boksi/erno_vesa_boksi_demo/Source/CMakeFiles /home/boksi/erno_vesa_boksi_demo/Source/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/Boksi/auxilo-box/CMakeFiles /home/pi/Boksi/auxilo-box/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/boksi/erno_vesa_boksi_demo/Source/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/Boksi/auxilo-box/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -135,6 +135,19 @@ devices/fast:
 .PHONY : devices/fast
 
 #=============================================================================
+# Target rules for targets named network
+
+# Build rule for target.
+network: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 network
+.PHONY : network
+
+# fast build rule for target.
+network/fast:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/build
+.PHONY : network/fast
+
+#=============================================================================
 # Target rules for targets named nexa
 
 # Build rule for target.
@@ -148,6 +161,19 @@ nexa/fast:
 .PHONY : nexa/fast
 
 #=============================================================================
+# Target rules for targets named nexa_pair
+
+# Build rule for target.
+nexa_pair: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 nexa_pair
+.PHONY : nexa_pair
+
+# fast build rule for target.
+nexa_pair/fast:
+	$(MAKE) -f CMakeFiles/nexa_pair.dir/build.make CMakeFiles/nexa_pair.dir/build
+.PHONY : nexa_pair/fast
+
+#=============================================================================
 # Target rules for targets named sensors
 
 # Build rule for target.
@@ -159,6 +185,102 @@ sensors: cmake_check_build_system
 sensors/fast:
 	$(MAKE) -f CMakeFiles/sensors.dir/build.make CMakeFiles/sensors.dir/build
 .PHONY : sensors/fast
+
+Communications/Client.o: Communications/Client.cpp.o
+.PHONY : Communications/Client.o
+
+# target to build an object file
+Communications/Client.cpp.o:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/Communications/Client.cpp.o
+.PHONY : Communications/Client.cpp.o
+
+Communications/Client.i: Communications/Client.cpp.i
+.PHONY : Communications/Client.i
+
+# target to preprocess a source file
+Communications/Client.cpp.i:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/Communications/Client.cpp.i
+.PHONY : Communications/Client.cpp.i
+
+Communications/Client.s: Communications/Client.cpp.s
+.PHONY : Communications/Client.s
+
+# target to generate assembly for a file
+Communications/Client.cpp.s:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/Communications/Client.cpp.s
+.PHONY : Communications/Client.cpp.s
+
+Communications/ClientObserver.o: Communications/ClientObserver.cpp.o
+.PHONY : Communications/ClientObserver.o
+
+# target to build an object file
+Communications/ClientObserver.cpp.o:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/Communications/ClientObserver.cpp.o
+.PHONY : Communications/ClientObserver.cpp.o
+
+Communications/ClientObserver.i: Communications/ClientObserver.cpp.i
+.PHONY : Communications/ClientObserver.i
+
+# target to preprocess a source file
+Communications/ClientObserver.cpp.i:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/Communications/ClientObserver.cpp.i
+.PHONY : Communications/ClientObserver.cpp.i
+
+Communications/ClientObserver.s: Communications/ClientObserver.cpp.s
+.PHONY : Communications/ClientObserver.s
+
+# target to generate assembly for a file
+Communications/ClientObserver.cpp.s:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/Communications/ClientObserver.cpp.s
+.PHONY : Communications/ClientObserver.cpp.s
+
+Communications/ClientWrapper.o: Communications/ClientWrapper.cpp.o
+.PHONY : Communications/ClientWrapper.o
+
+# target to build an object file
+Communications/ClientWrapper.cpp.o:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/Communications/ClientWrapper.cpp.o
+.PHONY : Communications/ClientWrapper.cpp.o
+
+Communications/ClientWrapper.i: Communications/ClientWrapper.cpp.i
+.PHONY : Communications/ClientWrapper.i
+
+# target to preprocess a source file
+Communications/ClientWrapper.cpp.i:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/Communications/ClientWrapper.cpp.i
+.PHONY : Communications/ClientWrapper.cpp.i
+
+Communications/ClientWrapper.s: Communications/ClientWrapper.cpp.s
+.PHONY : Communications/ClientWrapper.s
+
+# target to generate assembly for a file
+Communications/ClientWrapper.cpp.s:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/Communications/ClientWrapper.cpp.s
+.PHONY : Communications/ClientWrapper.cpp.s
+
+Communications/Message.o: Communications/Message.cpp.o
+.PHONY : Communications/Message.o
+
+# target to build an object file
+Communications/Message.cpp.o:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/Communications/Message.cpp.o
+.PHONY : Communications/Message.cpp.o
+
+Communications/Message.i: Communications/Message.cpp.i
+.PHONY : Communications/Message.i
+
+# target to preprocess a source file
+Communications/Message.cpp.i:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/Communications/Message.cpp.i
+.PHONY : Communications/Message.cpp.i
+
+Communications/Message.s: Communications/Message.cpp.s
+.PHONY : Communications/Message.s
+
+# target to generate assembly for a file
+Communications/Message.cpp.s:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/Communications/Message.cpp.s
+.PHONY : Communications/Message.cpp.s
 
 Devices/NexaPlug/NexaPlug.o: Devices/NexaPlug/NexaPlug.cpp.o
 .PHONY : Devices/NexaPlug/NexaPlug.o
@@ -472,6 +594,54 @@ demo.cpp.s:
 	$(MAKE) -f CMakeFiles/demo.dir/build.make CMakeFiles/demo.dir/demo.cpp.s
 .PHONY : demo.cpp.s
 
+nexa_pair.o: nexa_pair.cpp.o
+.PHONY : nexa_pair.o
+
+# target to build an object file
+nexa_pair.cpp.o:
+	$(MAKE) -f CMakeFiles/nexa_pair.dir/build.make CMakeFiles/nexa_pair.dir/nexa_pair.cpp.o
+.PHONY : nexa_pair.cpp.o
+
+nexa_pair.i: nexa_pair.cpp.i
+.PHONY : nexa_pair.i
+
+# target to preprocess a source file
+nexa_pair.cpp.i:
+	$(MAKE) -f CMakeFiles/nexa_pair.dir/build.make CMakeFiles/nexa_pair.dir/nexa_pair.cpp.i
+.PHONY : nexa_pair.cpp.i
+
+nexa_pair.s: nexa_pair.cpp.s
+.PHONY : nexa_pair.s
+
+# target to generate assembly for a file
+nexa_pair.cpp.s:
+	$(MAKE) -f CMakeFiles/nexa_pair.dir/build.make CMakeFiles/nexa_pair.dir/nexa_pair.cpp.s
+.PHONY : nexa_pair.cpp.s
+
+protocol.pb.o: protocol.pb.cc.o
+.PHONY : protocol.pb.o
+
+# target to build an object file
+protocol.pb.cc.o:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/protocol.pb.cc.o
+.PHONY : protocol.pb.cc.o
+
+protocol.pb.i: protocol.pb.cc.i
+.PHONY : protocol.pb.i
+
+# target to preprocess a source file
+protocol.pb.cc.i:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/protocol.pb.cc.i
+.PHONY : protocol.pb.cc.i
+
+protocol.pb.s: protocol.pb.cc.s
+.PHONY : protocol.pb.s
+
+# target to generate assembly for a file
+protocol.pb.cc.s:
+	$(MAKE) -f CMakeFiles/network.dir/build.make CMakeFiles/network.dir/protocol.pb.cc.s
+.PHONY : protocol.pb.cc.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -481,10 +651,24 @@ help:
 	@echo "... demo"
 	@echo "... devices"
 	@echo "... edit_cache"
+	@echo "... network"
 	@echo "... nexa"
+	@echo "... nexa_pair"
 	@echo "... rebuild_cache"
 	@echo "... sensors"
 	@echo "... test"
+	@echo "... Communications/Client.o"
+	@echo "... Communications/Client.i"
+	@echo "... Communications/Client.s"
+	@echo "... Communications/ClientObserver.o"
+	@echo "... Communications/ClientObserver.i"
+	@echo "... Communications/ClientObserver.s"
+	@echo "... Communications/ClientWrapper.o"
+	@echo "... Communications/ClientWrapper.i"
+	@echo "... Communications/ClientWrapper.s"
+	@echo "... Communications/Message.o"
+	@echo "... Communications/Message.i"
+	@echo "... Communications/Message.s"
 	@echo "... Devices/NexaPlug/NexaPlug.o"
 	@echo "... Devices/NexaPlug/NexaPlug.i"
 	@echo "... Devices/NexaPlug/NexaPlug.s"
@@ -524,6 +708,12 @@ help:
 	@echo "... demo.o"
 	@echo "... demo.i"
 	@echo "... demo.s"
+	@echo "... nexa_pair.o"
+	@echo "... nexa_pair.i"
+	@echo "... nexa_pair.s"
+	@echo "... protocol.pb.o"
+	@echo "... protocol.pb.i"
+	@echo "... protocol.pb.s"
 .PHONY : help
 
 

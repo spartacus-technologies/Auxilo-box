@@ -1,4 +1,4 @@
-# Install script for directory: /home/boksi/erno_vesa_boksi_demo/Source
+# Install script for directory: /home/pi/Boksi/auxilo-box
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -38,7 +38,7 @@ ELSE(CMAKE_INSTALL_COMPONENT)
   SET(CMAKE_INSTALL_MANIFEST "install_manifest.txt")
 ENDIF(CMAKE_INSTALL_COMPONENT)
 
-FILE(WRITE "/home/boksi/erno_vesa_boksi_demo/Source/${CMAKE_INSTALL_MANIFEST}" "")
+FILE(WRITE "/home/pi/Boksi/auxilo-box/${CMAKE_INSTALL_MANIFEST}" "")
 FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})
-  FILE(APPEND "/home/boksi/erno_vesa_boksi_demo/Source/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
+  FILE(APPEND "/home/pi/Boksi/auxilo-box/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
 ENDFOREACH(file)
