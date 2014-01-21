@@ -186,6 +186,19 @@ sensors/fast:
 	$(MAKE) -f CMakeFiles/sensors.dir/build.make CMakeFiles/sensors.dir/build
 .PHONY : sensors/fast
 
+#=============================================================================
+# Target rules for targets named wlan
+
+# Build rule for target.
+wlan: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 wlan
+.PHONY : wlan
+
+# fast build rule for target.
+wlan/fast:
+	$(MAKE) -f CMakeFiles/wlan.dir/build.make CMakeFiles/wlan.dir/build
+.PHONY : wlan/fast
+
 Communications/Client.o: Communications/Client.cpp.o
 .PHONY : Communications/Client.o
 
@@ -570,6 +583,30 @@ Sensors/Thermometer/Thermometer.cpp.s:
 	$(MAKE) -f CMakeFiles/sensors.dir/build.make CMakeFiles/sensors.dir/Sensors/Thermometer/Thermometer.cpp.s
 .PHONY : Sensors/Thermometer/Thermometer.cpp.s
 
+Wlan/wlan.o: Wlan/wlan.cpp.o
+.PHONY : Wlan/wlan.o
+
+# target to build an object file
+Wlan/wlan.cpp.o:
+	$(MAKE) -f CMakeFiles/wlan.dir/build.make CMakeFiles/wlan.dir/Wlan/wlan.cpp.o
+.PHONY : Wlan/wlan.cpp.o
+
+Wlan/wlan.i: Wlan/wlan.cpp.i
+.PHONY : Wlan/wlan.i
+
+# target to preprocess a source file
+Wlan/wlan.cpp.i:
+	$(MAKE) -f CMakeFiles/wlan.dir/build.make CMakeFiles/wlan.dir/Wlan/wlan.cpp.i
+.PHONY : Wlan/wlan.cpp.i
+
+Wlan/wlan.s: Wlan/wlan.cpp.s
+.PHONY : Wlan/wlan.s
+
+# target to generate assembly for a file
+Wlan/wlan.cpp.s:
+	$(MAKE) -f CMakeFiles/wlan.dir/build.make CMakeFiles/wlan.dir/Wlan/wlan.cpp.s
+.PHONY : Wlan/wlan.cpp.s
+
 demo.o: demo.cpp.o
 .PHONY : demo.o
 
@@ -657,6 +694,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... sensors"
 	@echo "... test"
+	@echo "... wlan"
 	@echo "... Communications/Client.o"
 	@echo "... Communications/Client.i"
 	@echo "... Communications/Client.s"
@@ -705,6 +743,9 @@ help:
 	@echo "... Sensors/Thermometer/Thermometer.o"
 	@echo "... Sensors/Thermometer/Thermometer.i"
 	@echo "... Sensors/Thermometer/Thermometer.s"
+	@echo "... Wlan/wlan.o"
+	@echo "... Wlan/wlan.i"
+	@echo "... Wlan/wlan.s"
 	@echo "... demo.o"
 	@echo "... demo.i"
 	@echo "... demo.s"

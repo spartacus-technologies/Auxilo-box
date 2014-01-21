@@ -31,4 +31,7 @@ fi
 #write config file
 printf "$output" > $path
 
+iwdown wlan0
+iwup wlan0
+
 exit 0

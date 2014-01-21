@@ -54,6 +54,12 @@ set(UTIL_SRC
 	Helpfunctions/helpfunctions.hh
 	)
 
+
+set(WLAN_SRC
+	Wlan/wlan.cpp
+	Wlan/wlan.cpp
+	)
+
 set(GPIO_SRCS
 	GPIO/GPIO.cpp
 	GPIO/GPIO.hh
@@ -125,6 +131,7 @@ add_library(network ${LIBNETWORK_SRCS} ${PROTO_SRCS} ${PROTO_HDRS})
 add_library(sensors ${SENSORS_SRCS})
 add_library(nexa ${NEXA_SRCS})
 add_library(devices ${DEVICES_SRCS})
+add_library(wlan ${WLAN_SRC})
 
 
 #add_subdirectory(Communications)
