@@ -1,3 +1,10 @@
+// See README.txt for information and build instructions.
+
+package protobuf;
+
+option java_package = "protobuf";
+option java_outer_classname = "ProtobufMessages";
+
 message HelloRequest
 {
     required string customerID = 1;
@@ -5,28 +12,45 @@ message HelloRequest
     required bool isBox = 3;
 }
 
-message DataMessage
+//Runko kaikkien viestien välittämiseksi:
+message Message
 {
-    required string deviceName = 1;
-    required RealMessage dataMesg = 2;
+    required string deviceName = 1; 	//Kohdelaitteen tunniste viestin vastaanottajan selvittämiseksi: yksi, kaksi tai kaikille
+    optional DataMessage dataMesg = 2;	//Paluuviesti datan välittämiseksi TAI
+    optional QueryMessage qry = 3;		//Varsinainen komento (laitteelle)
+
 }
 
-message RealMessage
+//Varsinainen laitteen tilasta kertova viesti:
+message DataMessage
 {
-    required string hardwareID = 1;
-    required float data = 2;
+    required string hardwareID = 1;		//Anturin, toimilaitteen yksilöllinen ID
+    required int32 data = 2;			//Anturidata
     required string timeStamp = 3;
 }
 
-
-message DeviceList
+message QueryMessage
 {
-    required string deviceID = 1;
-    optional string description = 2;
-    optional string name = 3;
+    required string sensorID = 1;		//Anturin tai laitteen ID
+}
+
+message DeviceList{
+
+	repeated DeviceInfo deviceList = 1;
+}
+
+message DeviceInfo
+{
+    required string boxID = 1;
+    required string deviceID = 2;
+    optional string description = 3;
+    optional string aliasName = 4;
+
     enum deviceType
     {
-        Sensor = 1;
-        Device = 2;
+        sensorTemp = 1;
+        deviceNexa = 2;
+        sensorPIR = 3;
     };
 }
+
