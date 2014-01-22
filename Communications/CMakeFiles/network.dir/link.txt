@@ -1,2 +1,0 @@
-/usr/bin/ar cr libnetwork.a  CMakeFiles/network.dir/Client.cpp.o CMakeFiles/network.dir/ClientWrapper.cpp.o CMakeFiles/network.dir/ClientObserver.cpp.o CMakeFiles/network.dir/Message.cpp.o CMakeFiles/network.dir/protocol.pb.cc.o
-/usr/bin/ranlib libnetwork.a
