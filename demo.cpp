@@ -8,7 +8,7 @@
 #include "Sensors/Switch/Switch.hh"
 #include "Sensors/Thermometer/Thermometer.hh"
 #include "Sensors/sensor.hh"
-#include "Communications/Communications.hh"
+//#include "Communications/Communications.hh"
 
 using namespace std;
 

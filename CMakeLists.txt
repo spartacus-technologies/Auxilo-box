@@ -117,6 +117,8 @@ set(LIBNETWORK_SRCS
     Communications/ClientObserver.hpp
     Communications/Message.cpp
     Communications/Message.hpp
+    Communications/protocol.pb.cc
+    Communications/protocol.pb.h
     ${LIBNETWORK_PROTOS}
 )
 
@@ -124,10 +126,11 @@ set(LIBNETWORK_SRCS
 # include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # Protobuf generation
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${LIBNETWORK_PROTOS})
+#PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${LIBNETWORK_PROTOS})
 
+#add_library(network ${LIBNETWORK_SRCS} ${PROTO_SRCS} ${PROTO_HDRS})
 
-add_library(network ${LIBNETWORK_SRCS} ${PROTO_SRCS} ${PROTO_HDRS})
+#add_library(network ${LIBNETWORK_SRCS})
 add_library(sensors ${SENSORS_SRCS})
 add_library(nexa ${NEXA_SRCS})
 add_library(devices ${DEVICES_SRCS})
@@ -146,7 +149,7 @@ add_executable(nexa_pair nexa_pair.cpp)
 
 target_link_libraries(demo sensors)
 target_link_libraries(demo nexa)
-target_link_libraries(demo network)
+#target_link_libraries(demo network)
 
 target_link_libraries(nexa_pair nexa)
 
