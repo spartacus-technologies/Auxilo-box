@@ -7,6 +7,9 @@
 #include "protocol.pb.h"
 #include "Client.hpp"
 
+int32_t const PROTOCOL_INITIALIZATION_MESSAGE = 0;
+int32_t const PROTOCOL_NORMAL_MESSAGE = 1;
+
 class ClientObserver;
 
 class ClientWrapper
@@ -19,13 +22,17 @@ class ClientWrapper
         // Initialize connection to server. Returns false if name not resolvable
         // TODO: Should return false also if server does not respond.
         bool initiateConnection(std::string& customerID,
-                                std::string& deviceID, bool isBox);        
+                                std::string& deviceID, bool isBox);
+
+        // Sending a DeviceList to server is a part of the handshake.
+        void sendDeviceList(protobuf::DeviceList &msg);
+
         // For sending DataMessage
-        void sendMessage(DataMessage &msg);
+        void sendMessage(protobuf::Message &msg);
 
         // Get the last message from FIFO buffer. Only this or Observer method
         // should be used, NOT simultaneously.
-        bool getLastMessage(DataMessage& rcv);
+        protobuf::Message* getLastMessage();
 
         // Add observer, which gets notifys when message has been received.
         void addObserver(ClientObserver* observer);
@@ -45,10 +52,8 @@ class ClientWrapper
 
         ClientObserver* observer_;
 
-        std::mutex rcvMsgMutex_;
-
         //FIFO-type round buffer for storing messages send by server.
-        std::deque<DataMessage> receivedMessages_;
+        std::deque<protobuf::Message> receivedMessages_;
 
 };
 

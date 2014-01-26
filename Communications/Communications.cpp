@@ -14,7 +14,7 @@ Communications::~Communications()
 
 }
 
-void Communications::initiate()
+void Communications::initiate(protobuf::DeviceList list)
 {
     // Lets save client identifiers locally first. Later when we get more
     // things going on the server we can implement web UI for customers to set
@@ -64,19 +64,18 @@ void Communications::initiate()
         std::cerr << "Client error: Server name not resolvable." << std::endl;
     }
 
+    // Send DeviceList
+    clientWrapper_->sendDeviceList(list);
 
+    // Handshake with the server should be OK.
 }
 
-void Communications::sendMessage(DataMessage &msg)
+void Communications::sendMessage(protobuf::Message &msg)
 {
     clientWrapper_->sendMessage(msg);
 }
 
-bool Communications::getMessage(DataMessage& msg)
+bool Communications::getMessage()
 {
-    if( clientWrapper_->getLastMessage(msg) )
-    {
-        return true;
-    }
-    return false;
+    return clientWrapper_->getLastMessage();
 }

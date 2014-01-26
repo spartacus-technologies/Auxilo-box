@@ -12,20 +12,21 @@ message HelloRequest
     required bool isBox = 3;
 }
 
-//Runko kaikkien viestien välittämiseksi:
+//Runko kaikkien viestien valittamiseksi:
 message Message
 {
-    required string deviceName = 1; 	//Kohdelaitteen tunniste viestin vastaanottajan selvittämiseksi: yksi, kaksi tai kaikille
-    optional DataMessage dataMesg = 2;	//Paluuviesti datan välittämiseksi TAI
-    optional QueryMessage qry = 3;		//Varsinainen komento (laitteelle)
+    //Kohdelaitteen tunniste viestin vastaanottajan maarittelemiseksi: Kohdelaitteen ID, tai ALL.
+    required string deviceName = 1;
+    optional DataMessage dataMesg = 2;	//Paluuviesti datan valittamiseksi TAI
+    optional QueryMessage qry = 3;	//Varsinainen komento (laitteelle)
 
 }
 
 //Varsinainen laitteen tilasta kertova viesti:
 message DataMessage
 {
-    required string hardwareID = 1;		//Anturin, toimilaitteen yksilöllinen ID
-    required int32 data = 2;			//Anturidata
+    required string hardwareID = 1;	//Anturin, toimilaitteen yksilollinen ID
+    required int32 data = 2;		//Anturidata
     required string timeStamp = 3;
 }
 
@@ -39,6 +40,13 @@ message DeviceList{
 	repeated DeviceInfo deviceList = 1;
 }
 
+enum deviceType
+{
+    sensorTemp = 1;
+    deviceNexa = 2;
+    sensorPIR = 3;
+};
+
 message DeviceInfo
 {
     required string boxID = 1;
@@ -46,11 +54,6 @@ message DeviceInfo
     optional string description = 3;
     optional string aliasName = 4;
 
-    enum deviceType
-    {
-        sensorTemp = 1;
-        deviceNexa = 2;
-        sensorPIR = 3;
-    };
+    required deviceType type = 5;
 }
 

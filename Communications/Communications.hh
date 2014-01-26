@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 
-const std::string SERVERIPADDRESS = "94.237.68.33";
+const std::string SERVERIPADDRESS = "95.85.11.190";
 const std::string PORT = "8081";
 
 #include "protocol.pb.h"
@@ -17,11 +17,11 @@ class Communications
         Communications();
         ~Communications();
 
-        void initiate();
+        void initiate(protobuf::DeviceList list);
 
-        void sendMessage(DataMessage& msg);
+        void sendMessage(protobuf::Message& msg);
 
-        bool getMessage(DataMessage& msg);
+        bool getMessage();
 
     private:
 

@@ -4,7 +4,7 @@
 
 #include <boost/asio.hpp>
 #include "protocol.pb.h"
-#include "Message.hpp"
+#include "SocketMessage.hpp"
 
 #include <mutex>
 #include <deque>
@@ -29,7 +29,7 @@ class Client
         void end_session();
 
         // Send serialized message to server
-        void sendMessage(std::string msg);
+        void sendMessage(std::string msg, int32_t type);
 
     private:
 
@@ -50,10 +50,10 @@ class Client
         boost::asio::ip::tcp::socket socket_;
 
         // For storing messages to be sent
-        std::deque<Message> msgBuffer_;
+        std::deque<SocketMessage> msgBuffer_;
 
         // Temporary message for receiving
-        Message message_receive_;
+        SocketMessage message_receive_;
 
         // Pointer to ClientWrapper for callbacks
         ClientWrapper* wrapper_;

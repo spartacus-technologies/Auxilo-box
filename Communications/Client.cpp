@@ -1,6 +1,8 @@
 #include "Client.hpp"
 #include "ClientWrapper.hpp"
 
+#include <stdlib.h> // atoi
+
 
 Client::Client(boost::asio::io_service &io_service,
                boost::asio::ip::tcp::resolver::iterator endpoint_iterator, ClientWrapper *wrapper):
@@ -35,14 +37,14 @@ void Client::do_connect(boost::asio::ip::tcp::resolver::iterator
 bool Client::initiateConnection(std::string& msg)
 {
 
-    Message message;
+    SocketMessage message;
     message.setType(0);
     message.setLength(msg.size());
     std::memcpy(message.dataBuffer(), msg.c_str(), msg.length());
     message.encodeHeader();
     boost::system::error_code ec;
     boost::asio::write(socket_, boost::asio::buffer(message.headerBuffer(),
-                                                    message.getLength()+ Message::HEADER_LENGTH),
+                                                    message.getLength()+ SocketMessage::HEADER_LENGTH),
         boost::asio::transfer_all(), ec);
 
     // Wait for ACK
@@ -54,7 +56,7 @@ bool Client::initiateConnection(std::string& msg)
 void Client::end_session()
 {
     std::cout << "Terminating server session." << std::endl;
-    Message message;
+    SocketMessage message;
     message.setType(1000);
     message.encodeHeader();
 
@@ -75,7 +77,7 @@ void Client::end_session()
 void Client::do_read_header()
 {
     boost::asio::async_read(socket_,
-           boost::asio::buffer(message_receive_.headerBuffer(), Message::
+           boost::asio::buffer(message_receive_.headerBuffer(), SocketMessage::
                                HEADER_LENGTH),
        [this](boost::system::error_code ec, std::size_t /*length*/)
        {
@@ -128,15 +130,15 @@ void Client::do_read_data()
 }
 
 
-void Client::sendMessage(std::string msg)
+void Client::sendMessage(std::string msg, int32_t type)
 {
 
     // Todo: check message memory boundaries, 512 bytes max.
-    std::cout << "Message size: " << msg.size() << std::endl;
-    Message message;
+
+    SocketMessage message;
     message.setLength(msg.length());
     std::memcpy(message.dataBuffer(), msg.c_str(), msg.length());
-    message.setType(0);
+    message.setType(type);
     message.encodeHeader();
 
 
@@ -157,13 +159,22 @@ void Client::do_write()
 {
     boost::asio::async_write(socket_,
                              boost::asio::buffer(msgBuffer_.front().headerBuffer(),
-                                                 msgBuffer_.front().getLength()+ Message::HEADER_LENGTH),
+                                                 msgBuffer_.front().getLength()+ SocketMessage::HEADER_LENGTH),
         [this](boost::system::error_code ec, std::size_t)
         {
           if (!ec)
           {
               std::lock_guard<std::mutex> guard(msgBufferMutex_);
               std::cout << "sending message with length " << msgBuffer_.front().getLength() << std::endl;
+
+
+              std::cout << "Print the message:" << std::endl;
+              for( unsigned i = 0; i < msgBuffer_.front().getLength() + 8; ++i)
+              {
+                  int ij = static_cast<int> (msgBuffer_.front().headerBuffer()[i]);
+                  std::cout << "char[" << i << "]: " << msgBuffer_.front().headerBuffer()[i] << " (" << ij << ")" << std::endl;
+              }
+
               msgBuffer_.pop_front();
 
               if (!msgBuffer_.empty())
@@ -178,6 +189,3 @@ void Client::do_write()
           }
         });
 }
-
-
-

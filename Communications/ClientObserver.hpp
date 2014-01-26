@@ -1,6 +1,8 @@
 #ifndef CLIENTOBSERVER_HPP
 #define CLIENTOBSERVER_HPP
 
+#include "protocol.pb.h"
+
 // This class can be used to implement the observer functionality to
 // client side application code, which uses this network 'library'.
 // In general, the observer is notified after network-client receives
@@ -28,7 +30,7 @@ class ClientObserver
 
         virtual ~ClientObserver();
 
-        virtual void update(DataMessage& msg) = 0;
+        virtual void update(protobuf::Message& msg) = 0;
 
     private:
         ClientWrapper* wrapper_;

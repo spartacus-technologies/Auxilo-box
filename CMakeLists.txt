@@ -109,14 +109,16 @@ set(LIBNETWORK_PROTOS
 
 # List of source files
 set(LIBNETWORK_SRCS
+	Communications/Communications.cpp
+	Communications/Communications.hh
     Communications/Client.cpp
     Communications/Client.hpp
     Communications/ClientWrapper.cpp
     Communications/ClientWrapper.hpp
     Communications/ClientObserver.cpp
     Communications/ClientObserver.hpp
-    Communications/Message.cpp
-    Communications/Message.hpp
+    Communications/SocketMessage.cpp
+    Communications/SocketMessage.hpp
     Communications/protocol.pb.cc
     Communications/protocol.pb.h
     ${LIBNETWORK_PROTOS}
@@ -130,7 +132,11 @@ set(LIBNETWORK_SRCS
 
 #add_library(network ${LIBNETWORK_SRCS} ${PROTO_SRCS} ${PROTO_HDRS})
 
-#add_library(network ${LIBNETWORK_SRCS})
+add_library(network ${LIBNETWORK_SRCS})
+target_link_libraries(network ${Boost_LIBRARIES})
+target_link_libraries(network ${PROTOBUF_LIBRARY})
+
+
 add_library(sensors ${SENSORS_SRCS})
 add_library(nexa ${NEXA_SRCS})
 add_library(devices ${DEVICES_SRCS})
@@ -149,7 +155,7 @@ add_executable(nexa_pair nexa_pair.cpp)
 
 target_link_libraries(demo sensors)
 target_link_libraries(demo nexa)
-#target_link_libraries(demo network)
+target_link_libraries(demo network)
 
 target_link_libraries(nexa_pair nexa)
 

@@ -17,10 +17,9 @@ ClientWrapper::~ClientWrapper()
     }
 }
 
-// Call back function
 void ClientWrapper::deliverMessage(std::string& msg)
 {
-    DataMessage mesg;
+    protobuf::Message mesg;
     mesg.ParseFromString(msg);
 
     // If observer is registered, inform it about the mesg.
@@ -31,7 +30,6 @@ void ClientWrapper::deliverMessage(std::string& msg)
     }
 
     // Otherwise store the message in buffer.
-    std::lock_guard<std::mutex> guard(rcvMsgMutex_);
     receivedMessages_.push_back(mesg);
 }
 
@@ -54,14 +52,14 @@ bool ClientWrapper::initiateConnection(std::string& customerID,
 
         // Inform server that this box/client wants to join customer room by
         // sending Hellorequest message.
-        HelloRequest initializer;
+        protobuf::HelloRequest initializer;
         initializer.set_customerid(customerID);
         initializer.set_devicename(deviceID);
         initializer.set_isbox(isBox);
-        std::cout << customerID << deviceID << isBox << std::endl;
+
         std::string mesg;
         initializer.SerializeToString(&mesg);
-        Client_->sendMessage(mesg);
+        Client_->sendMessage(mesg, PROTOCOL_INITIALIZATION_MESSAGE);
 
 
         std::cout << "Client initialized." << std::endl;
@@ -76,28 +74,26 @@ bool ClientWrapper::initiateConnection(std::string& customerID,
     }
 }
 
-void ClientWrapper::sendMessage(DataMessage& msg)
+void ClientWrapper::sendDeviceList(protobuf::DeviceList& msg)
 {
     std::string pntr;
-    if(!msg.SerializeToString(&pntr))
-    {
-        std::cout << "Ei onnistu" << std::endl;
-    }
-    Client_->sendMessage(pntr);
+    msg.SerializeToString(&pntr);
+    Client_->sendMessage(pntr, PROTOCOL_INITIALIZATION_MESSAGE);
 }
 
-bool ClientWrapper::getLastMessage(DataMessage &rcv)
+void ClientWrapper::sendMessage(protobuf::Message &msg)
 {
-    {
-        std::lock_guard<std::mutex> guard(rcvMsgMutex_);
-        if(receivedMessages_.empty())
-        {
-            return false;
-        }
-        rcv = receivedMessages_.front();
-        receivedMessages_.pop_front();
-    }
-    return true;
+    std::cout << "Sending DataMessage." << std::endl;
+    std::string pntr;
+    msg.SerializeToString(&pntr);
+    Client_->sendMessage(pntr, PROTOCOL_NORMAL_MESSAGE);
+}
+
+protobuf::Message *ClientWrapper::getLastMessage()
+{
+    protobuf::Message* tmp = &receivedMessages_.front();
+    receivedMessages_.pop_front();
+    return tmp;
 }
 
 void ClientWrapper::addObserver(ClientObserver *observer)
