@@ -32,7 +32,7 @@ class ClientWrapper
 
         // Get the last message from FIFO buffer. Only this or Observer method
         // should be used, NOT simultaneously.
-        auxilo::Message* getLastMessage();
+        bool getLastMessage(auxilo::Message &msg);
 
         // Add observer, which gets notifys when message has been received.
         void addObserver(ClientObserver* observer);

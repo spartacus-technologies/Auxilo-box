@@ -115,19 +115,23 @@ int main(int argc, char const *argv[])
 			{
 				if (data.isSuccessful)
 				{
+					//Tässä data talteen johonkin säiliöön?
 					cout << "Lampotila on " << data.value << " astetta." << endl;
 
-					auxilo::DataMessage* datamsg = auxilo::DataMessage().New();
-				   	datamsg->set_hardwareid(data.sensorID);
-				   	datamsg->set_data((int)data.value);
-				   	datamsg->set_timestamp(data.read_time);
+					//KOMMUNIKAATION TESTAUSTA VARTEN!
+					//-------------------------------------
+					auxilo::DataMessage datamsg;
+				   	datamsg.set_hardwareid(data.sensorID);
+				   	datamsg.set_data(data.value);
+				   	datamsg.set_timestamp(data.read_time);
  
-    				auxilo::Message* ans = auxilo::Message().New();
-	   				ans->set_devicename(BOXID);
-	   				(*ans->mutable_datamesg()) = *datamsg;
+    				auxilo::Message ans;
+	   				ans.set_devicename(BOXID);
+	   				(*ans.mutable_datamesg()) = datamsg;
 
-	   				comm.sendMessage(*ans);
+	   				comm.sendMessage(ans);
 	   				cout << "message sent" << endl;
+	   				//-------------------------------------
 				}
 				else
 				{
@@ -140,18 +144,17 @@ int main(int argc, char const *argv[])
 		}
 
 		//Read new messages
-/*
 		cout << "check mailbox" << endl;
-		auxilo::Message* msg = comm.getMessage();
-		cout << "mailbox checked" << endl;
-		while ( msg != 0 )
+		auxilo::Message msg;
+		while ( comm.getMessage(msg) )
 		{
 			cout << "new message!!!" << endl;
 			  //Query for sensors
-			  if ( msg->has_qry() and msg->qry().has_sensorid() )
+			  if ( msg.has_qry() and msg.qry().has_sensorid() )
 			  {
-			   		string sensorID = msg->qry().sensorid();
+			   		string sensorID = msg.qry().sensorid();
 
+			   		//TÄMÄ TIETO JOSTAIN SÄILIÖSTÄ!
 			   		for(unsigned i = 0; i < sensors.size(); ++i)
 			   		{
 			   			Sensor::sensorData data = sensors.at(i)->getData();
@@ -160,23 +163,24 @@ int main(int argc, char const *argv[])
 			   			{
 			   				cout << "Sending sensordata: " << sensorID << ": " << data.value << endl;
 
-			   				//Create message
-			   				auxilo::DataMessage* datamsg = auxilo::DataMessage().New();
-			   				datamsg->set_hardwareid(sensorID);
-			   				datamsg->set_data(data.value);
-			   				datamsg->set_timestamp(data.read_time);
+			   				//Create message...
+			   				auxilo::DataMessage datamsg;
+			   				datamsg.set_hardwareid(sensorID);
+			   				datamsg.set_data(data.value);
+			   				datamsg.set_timestamp(data.read_time);
 
-			   				auxilo::Message* ans = auxilo::Message().New();
-			   				ans->set_devicename(BOXID);
-			   				(*ans->mutable_datamesg()) = *datamsg;
+			   				auxilo::Message ans;
+			   				ans.set_devicename(BOXID);
+			   				(*ans.mutable_datamesg()) = datamsg;
 
-			   				comm.sendMessage(*ans);
+			   				//... and send it.
+			   				comm.sendMessage(ans);
 
 			   			}
 			   		}
 			  }
 		}
-*/
+
 		
 
 	}

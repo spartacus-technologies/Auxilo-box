@@ -89,11 +89,16 @@ void ClientWrapper::sendMessage(auxilo::Message &msg)
     Client_->sendMessage(pntr, PROTOCOL_NORMAL_MESSAGE);
 }
 
-auxilo::Message *ClientWrapper::getLastMessage()
+bool ClientWrapper::getLastMessage(auxilo::Message &msg)
 {
-    auxilo::Message* tmp = &receivedMessages_.front();
+    if ( receivedMessages_.empty() )
+    {
+        return false;
+    }
+
+    msg = receivedMessages_.front();
     receivedMessages_.pop_front();
-    return tmp;
+    return true;
 }
 
 void ClientWrapper::addObserver(ClientObserver *observer)
