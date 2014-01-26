@@ -1,8 +1,8 @@
 // See README.txt for information and build instructions.
 
-package protobuf;
+package auxilo;
 
-option java_package = "protobuf";
+option java_package = "auxilo";
 option java_outer_classname = "ProtobufMessages";
 
 message HelloRequest
@@ -56,4 +56,5 @@ message DeviceInfo
 
     required deviceType type = 5;
 }
+
 

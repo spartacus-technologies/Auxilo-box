@@ -26,20 +26,20 @@ int main(int argc, char const *argv[])
     //// Communications
 
     // Create DeviceList to be sent to the server.
-    protobuf::DeviceList listOfDevices;
+    auxilo::DeviceList listOfDevices;
 
 
     // Fill all entries to the newDevice (at least those which are required).
     for(unsigned i = 0; i < sensors.size(); ++i)
     {
     	// Add new device to the list.
-    	protobuf::DeviceInfo* newDevice = listOfDevices.add_devicelist();
+    	auxilo::DeviceInfo* newDevice = listOfDevices.add_devicelist();
 
     	Switch* pir = dynamic_cast<Switch*>( sensors.at(i) );
 
     	if (pir != 0)
     	{
-    		newDevice->set_type(protobuf::deviceType::sensorPIR);
+    		newDevice->set_type(auxilo::deviceType::sensorPIR);
     		cout << "Uusi pir-anturi" << endl;
     	}
     	else
@@ -48,7 +48,7 @@ int main(int argc, char const *argv[])
 
     		if ( therm != 0 )
     		{
-    			newDevice->set_type(protobuf::deviceType::sensorTemp);
+    			newDevice->set_type(auxilo::deviceType::sensorTemp);
     			cout << "Uusi lampotila-anturi" << endl;
     		}
     		else //unknown sensortype (unknown to protocol)
@@ -64,10 +64,10 @@ int main(int argc, char const *argv[])
 
 
     //Lisätään 1 Nexa, koska laitteiden yhteistä rajapintaa ei ole tehty.
-	protobuf::DeviceInfo* newDevice = listOfDevices.add_devicelist();
+	auxilo::DeviceInfo* newDevice = listOfDevices.add_devicelist();
     
 
-    newDevice->set_type(protobuf::deviceType::deviceNexa); // Setting temp sensor device.
+    newDevice->set_type(auxilo::deviceType::deviceNexa); // Setting temp sensor device.
     (*newDevice->mutable_boxid()) = BOXID;
     // (*newDevice->mutable_description()) ="Kuvaus";
 

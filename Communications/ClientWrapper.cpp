@@ -19,7 +19,7 @@ ClientWrapper::~ClientWrapper()
 
 void ClientWrapper::deliverMessage(std::string& msg)
 {
-    protobuf::Message mesg;
+    auxilo::Message mesg;
     mesg.ParseFromString(msg);
 
     // If observer is registered, inform it about the mesg.
@@ -52,7 +52,7 @@ bool ClientWrapper::initiateConnection(std::string& customerID,
 
         // Inform server that this box/client wants to join customer room by
         // sending Hellorequest message.
-        protobuf::HelloRequest initializer;
+        auxilo::HelloRequest initializer;
         initializer.set_customerid(customerID);
         initializer.set_devicename(deviceID);
         initializer.set_isbox(isBox);
@@ -74,14 +74,14 @@ bool ClientWrapper::initiateConnection(std::string& customerID,
     }
 }
 
-void ClientWrapper::sendDeviceList(protobuf::DeviceList& msg)
+void ClientWrapper::sendDeviceList(auxilo::DeviceList& msg)
 {
     std::string pntr;
     msg.SerializeToString(&pntr);
     Client_->sendMessage(pntr, PROTOCOL_INITIALIZATION_MESSAGE);
 }
 
-void ClientWrapper::sendMessage(protobuf::Message &msg)
+void ClientWrapper::sendMessage(auxilo::Message &msg)
 {
     std::cout << "Sending DataMessage." << std::endl;
     std::string pntr;
@@ -89,9 +89,9 @@ void ClientWrapper::sendMessage(protobuf::Message &msg)
     Client_->sendMessage(pntr, PROTOCOL_NORMAL_MESSAGE);
 }
 
-protobuf::Message *ClientWrapper::getLastMessage()
+auxilo::Message *ClientWrapper::getLastMessage()
 {
-    protobuf::Message* tmp = &receivedMessages_.front();
+    auxilo::Message* tmp = &receivedMessages_.front();
     receivedMessages_.pop_front();
     return tmp;
 }

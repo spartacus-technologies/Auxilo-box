@@ -14,7 +14,7 @@ Communications::~Communications()
 
 }
 
-void Communications::initiate(protobuf::DeviceList list)
+void Communications::initiate(auxilo::DeviceList list)
 {
     // Lets save client identifiers locally first. Later when we get more
     // things going on the server we can implement web UI for customers to set
@@ -70,7 +70,7 @@ void Communications::initiate(protobuf::DeviceList list)
     // Handshake with the server should be OK.
 }
 
-void Communications::sendMessage(protobuf::Message &msg)
+void Communications::sendMessage(auxilo::Message &msg)
 {
     clientWrapper_->sendMessage(msg);
 }

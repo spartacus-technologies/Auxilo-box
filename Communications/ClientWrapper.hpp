@@ -25,14 +25,14 @@ class ClientWrapper
                                 std::string& deviceID, bool isBox);
 
         // Sending a DeviceList to server is a part of the handshake.
-        void sendDeviceList(protobuf::DeviceList &msg);
+        void sendDeviceList(auxilo::DeviceList &msg);
 
         // For sending DataMessage
-        void sendMessage(protobuf::Message &msg);
+        void sendMessage(auxilo::Message &msg);
 
         // Get the last message from FIFO buffer. Only this or Observer method
         // should be used, NOT simultaneously.
-        protobuf::Message* getLastMessage();
+        auxilo::Message* getLastMessage();
 
         // Add observer, which gets notifys when message has been received.
         void addObserver(ClientObserver* observer);
@@ -53,7 +53,7 @@ class ClientWrapper
         ClientObserver* observer_;
 
         //FIFO-type round buffer for storing messages send by server.
-        std::deque<protobuf::Message> receivedMessages_;
+        std::deque<auxilo::Message> receivedMessages_;
 
 };
 

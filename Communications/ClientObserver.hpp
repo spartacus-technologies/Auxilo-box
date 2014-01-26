@@ -30,7 +30,7 @@ class ClientObserver
 
         virtual ~ClientObserver();
 
-        virtual void update(protobuf::Message& msg) = 0;
+        virtual void update(auxilo::Message& msg) = 0;
 
     private:
         ClientWrapper* wrapper_;

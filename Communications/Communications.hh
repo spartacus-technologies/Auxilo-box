@@ -17,9 +17,9 @@ class Communications
         Communications();
         ~Communications();
 
-        void initiate(protobuf::DeviceList list);
+        void initiate(auxilo::DeviceList list);
 
-        void sendMessage(protobuf::Message& msg);
+        void sendMessage(auxilo::Message& msg);
 
         bool getMessage();
 
