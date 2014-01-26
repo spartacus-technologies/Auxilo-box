@@ -75,7 +75,7 @@ void Communications::sendMessage(auxilo::Message &msg)
     clientWrapper_->sendMessage(msg);
 }
 
-bool Communications::getMessage()
+auxilo::Message* Communications::getMessage()
 {
     return clientWrapper_->getLastMessage();
 }

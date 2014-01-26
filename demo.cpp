@@ -80,18 +80,18 @@ int main(int argc, char const *argv[])
     Communications comm;
     cout << "comm init" << endl;
     comm.initiate(listOfDevices);
-		cout << "comm valmis" << endl;
+	cout << "comm valmis" << endl;
     //// Communications initialized.
 
 	while (true)
 	{
 
-		sleep(1);
+		sleep(10);
 
 		//Check sensor data
 		for(unsigned i = 0; i < sensors.size(); ++i)
 		{
-			// Sensor::sensorData data = sensors.at(i)->getData();
+			Sensor::sensorData data = sensors.at(i)->getData();
 
 			// //Näiden dynamic_castien tilalle tulee aikanaan sitten niitä sääntöluokan olioita.
 			// //Tai sitten ei.
@@ -110,30 +110,73 @@ int main(int argc, char const *argv[])
 			// 	}
 			// }
 
-			// Thermometer* therm = dynamic_cast<Thermometer*>( sensors.at(i) );
-			// if (therm != 0 and data.isSuccessful)
-			// {
-			// 	if (data.isSuccessful)
-			// 	{
-			// 		cout << "Lampotila on " << data.value << " astetta." << endl;
-			// 	}
-			// 	else
-			// 	{
-			// 		cout << "Lampotilan tarkastaminen epaonnistui! :("<< endl;
-			// 	}
-			// }
+			Thermometer* therm = dynamic_cast<Thermometer*>( sensors.at(i) );
+			if (therm != 0 and data.isSuccessful)
+			{
+				if (data.isSuccessful)
+				{
+					cout << "Lampotila on " << data.value << " astetta." << endl;
+
+					auxilo::DataMessage* datamsg = auxilo::DataMessage().New();
+				   	datamsg->set_hardwareid(data.sensorID);
+				   	datamsg->set_data((int)data.value);
+				   	datamsg->set_timestamp(data.read_time);
+ 
+    				auxilo::Message* ans = auxilo::Message().New();
+	   				ans->set_devicename(BOXID);
+	   				(*ans->mutable_datamesg()) = *datamsg;
+
+	   				comm.sendMessage(*ans);
+	   				cout << "message sent" << endl;
+				}
+				else
+				{
+					cout << "Lampotilan tarkastaminen epaonnistui! :("<< endl;
+				}
+			}
 
 			//-------------------------------------------------------------------------------
 
 		}
 
 		//Read new messages
-		//Datamessage msg();
-		// while ( comm->getMessage(msg) )
-		// {
-		// 	   ....
-		// }
+/*
+		cout << "check mailbox" << endl;
+		auxilo::Message* msg = comm.getMessage();
+		cout << "mailbox checked" << endl;
+		while ( msg != 0 )
+		{
+			cout << "new message!!!" << endl;
+			  //Query for sensors
+			  if ( msg->has_qry() and msg->qry().has_sensorid() )
+			  {
+			   		string sensorID = msg->qry().sensorid();
 
+			   		for(unsigned i = 0; i < sensors.size(); ++i)
+			   		{
+			   			Sensor::sensorData data = sensors.at(i)->getData();
+
+			   			if ( data.sensorID == sensorID )
+			   			{
+			   				cout << "Sending sensordata: " << sensorID << ": " << data.value << endl;
+
+			   				//Create message
+			   				auxilo::DataMessage* datamsg = auxilo::DataMessage().New();
+			   				datamsg->set_hardwareid(sensorID);
+			   				datamsg->set_data(data.value);
+			   				datamsg->set_timestamp(data.read_time);
+
+			   				auxilo::Message* ans = auxilo::Message().New();
+			   				ans->set_devicename(BOXID);
+			   				(*ans->mutable_datamesg()) = *datamsg;
+
+			   				comm.sendMessage(*ans);
+
+			   			}
+			   		}
+			  }
+		}
+*/
 		
 
 	}

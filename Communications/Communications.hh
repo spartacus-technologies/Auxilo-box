@@ -21,7 +21,7 @@ class Communications
 
         void sendMessage(auxilo::Message& msg);
 
-        bool getMessage();
+        auxilo::Message* getMessage();
 
     private:
 
