@@ -1,11 +1,11 @@
-#ifndef MESSAGE_HPP
-#define MESSAGE_HPP
+#ifndef SOCKETMESSAGE_HPP
+#define SOCKETMESSAGE_HPP
 
 #include <cstdint>
 #include <stdint.h>
 #include <string>
 
-class Message
+class SocketMessage
 {
     public:
         // TODO: Endianess!
@@ -17,11 +17,11 @@ class Message
         // TODO: Change to bigger
         enum { MAX_BODY_LENGTH = 512 };
 
-        Message();
+        SocketMessage();
 
-        Message(uint32_t tpe, std::string msg);
+        SocketMessage(uint32_t tpe, std::string msg);
 
-        virtual ~Message();
+        virtual ~SocketMessage();
 
         // Get pointer to beginning of header
         char* headerBuffer();
@@ -48,9 +48,13 @@ class Message
         void decodeHeader();
 
     private:
+
+        // Changes header's byte order from big endian to little endian or vice versa.
+        void changeEndianess();
+
         uint32_t length_;
         uint32_t type_;
         char data_[HEADER_LENGTH + TYPE_LENGTH + MAX_BODY_LENGTH];
 };
 
-#endif /* MESSAGE_HPP */
+#endif /* SOCKETMESSAGE_HPP */
