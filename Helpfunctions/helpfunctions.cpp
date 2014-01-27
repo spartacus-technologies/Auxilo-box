@@ -73,4 +73,19 @@ namespace Help
 	    std::string time_temp = asctime(timeinfo);
 	    return time_temp.substr(0,time_temp.size()-1);
 	}
+
+	std::string readLastNLinesFromFile(std::string file, int lines)
+	{
+		std::string cmd = "tail -"+intToStr(lines)+" "+file;
+		std::string output = runCommand(cmd);
+
+		std::string error = runCommand("echo \""+output+"\" | grep \"No such file\"");
+
+		if ( !error.empty() )
+		{
+			return "";
+		}
+
+		return output;
+	}
 }

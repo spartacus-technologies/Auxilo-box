@@ -13,6 +13,9 @@ namespace Help
 	// Runs shell command 
     // returns command output as a string or "ERROR" in case of error
 	std::string runCommand(const std::string & cmd);
+
+	//returns last lines. Return empty string if file is not found or it is empty.
+	std::string readLastNLinesFromFile(std::string file, int lines = 1);
 }
 
 

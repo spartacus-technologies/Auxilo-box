@@ -2,6 +2,7 @@
 #include <iostream>
 #include <unistd.h> //sleep
 #include <vector>
+#include <fstream>
 
 
 #include "Devices/NexaPlug/NexaPlug.hh"
@@ -9,11 +10,26 @@
 #include "Sensors/Thermometer/Thermometer.hh"
 #include "Sensors/sensor.hh"
 #include "Communications/Communications.hh"
+#include "Helpfunctions/helpfunctions.hh"
 
 using namespace std;
 
+// Viestit dequeen, josta ne lähetetään säikeessä. Näin ollen viestit eivät mene hukkaan, mikäli
+// netti katkeaa hetkeksi ja ohjelma ei mene jumiin, jos lähettäminen kestää. Ehkä communications 
+// luokkaan?
+
+// Pääsilmukassa tarkastetaan anturien arvoja ja arvot tallennetaan tiedostoon (csv), jonka 
+// nimenä on anturin id. Jos anturin arvoa halutaan, niin luetaan oikeasta id:stä viimonen rivi
+// tai koko tiedosto.
+
 bool initSensors(vector<Sensor*>* sensors);
+void writeLog(const string& sensor_id, const string& date, float value);
+string getDateFromLogLine(const string& line);
+float getValueFromLogLine(const string& line);
+
 const string BOXID = "1";
+const string LOGDIR = "log/";
+const string LOGFILETYPE = ".csv";
 
 int main(int argc, char const *argv[])
 {
@@ -115,7 +131,7 @@ int main(int argc, char const *argv[])
 			{
 				if (data.isSuccessful)
 				{
-					//Tässä data talteen johonkin säiliöön?
+					//Data logiin talteen
 					cout << "Lampotila on " << data.value << " astetta." << endl;
 
 					//KOMMUNIKAATION TESTAUSTA VARTEN!
@@ -132,6 +148,15 @@ int main(int argc, char const *argv[])
 	   				comm.sendMessage(ans);
 	   				cout << "message sent" << endl;
 	   				//-------------------------------------
+
+	   				writeLog(data.sensorID, data.read_time, data.value);
+
+	   				//TESTI:
+	   				// string last_result = Help::readLastNLinesFromFile(LOGDIR + data.sensorID+LOGFILETYPE);
+
+	   				// std::cout << last_result << std::endl;
+	   				// cout << "Value: " << getValueFromLogLine(last_result) << endl;
+	   				// cout << "Date: " << getDateFromLogLine(last_result) << endl;
 				}
 				else
 				{
@@ -142,6 +167,9 @@ int main(int argc, char const *argv[])
 			//-------------------------------------------------------------------------------
 
 		}
+
+		
+
 
 		//Read new messages
 		cout << "check mailbox" << endl;
@@ -154,30 +182,27 @@ int main(int argc, char const *argv[])
 			  {
 			   		string sensorID = msg.qry().sensorid();
 
-			   		//TÄMÄ TIETO JOSTAIN SÄILIÖSTÄ!
-			   		for(unsigned i = 0; i < sensors.size(); ++i)
+			   		string last_result = Help::readLastNLinesFromFile(LOGDIR + sensorID+LOGFILETYPE);
+
+			   		if (!last_result.empty())
 			   		{
-			   			Sensor::sensorData data = sensors.at(i)->getData();
+			   			float value = getValueFromLogLine(last_result);
+			   			string date = getDateFromLogLine(last_result);
 
-			   			if ( data.sensorID == sensorID )
-			   			{
-			   				cout << "Sending sensordata: " << sensorID << ": " << data.value << endl;
+			   			//Create message...
+			   			auxilo::DataMessage datamsg;
+			   			datamsg.set_hardwareid(sensorID);
+			   			datamsg.set_data(value);
+			   			datamsg.set_timestamp(date);
 
-			   				//Create message...
-			   				auxilo::DataMessage datamsg;
-			   				datamsg.set_hardwareid(sensorID);
-			   				datamsg.set_data(data.value);
-			   				datamsg.set_timestamp(data.read_time);
+		   				auxilo::Message ans;
+		   				ans.set_devicename(BOXID);
+		   				(*ans.mutable_datamesg()) = datamsg;
 
-			   				auxilo::Message ans;
-			   				ans.set_devicename(BOXID);
-			   				(*ans.mutable_datamesg()) = datamsg;
-
-			   				//... and send it.
-			   				comm.sendMessage(ans);
-
-			   			}
+		   				//... and send it.
+		   				comm.sendMessage(ans);
 			   		}
+
 			  }
 		}
 
@@ -222,15 +247,44 @@ bool initSensors(vector<Sensor*>* sensors)
 	sensorPtr->init();
 
 	sensors->push_back(sensorPtr);
-
-	//Some other sensor:
-	//sensorPtr = new Switch();
-	//...
-
 	
 	//Debug:
 	cout<<"initSensors(): SensorVector size: "<<sensors->size()<<endl;
 	
 	//all went well:
 	return true;
+}
+
+void writeLog(const string& sensor_id, const string& date, float value)
+{
+	ofstream file;
+
+	file.open(LOGDIR + sensor_id+LOGFILETYPE, ios::out | ios::app);
+
+	if (file.is_open())
+  	{
+	    file << date+",";
+	    file << value;
+	    file << "\n";
+	    file.close();
+  	}
+}
+
+string getDateFromLogLine(const string& line)
+{
+	unsigned delimeter_pos = line.find(",");
+
+	if ( delimeter_pos < 1 ) return "";
+
+	return line.substr(0, delimeter_pos);
+}
+
+float getValueFromLogLine(const string& line)
+{
+	unsigned delimeter_pos = line.find(",");
+
+	if ( delimeter_pos < 1 ) return 0;
+
+	return Help::strToFloat(line.substr(delimeter_pos+1));
+
 }

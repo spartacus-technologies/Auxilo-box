@@ -241,4 +241,6 @@ echo "Done"
 rm output.txt
 
 echo -e "\n\nExecutables are in subfolder \"bin\""
+
+mkdir log
 exit 0
