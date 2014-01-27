@@ -26,7 +26,7 @@ message Message
 message DataMessage
 {
     required string hardwareID = 1;	//Anturin, toimilaitteen yksilollinen ID
-    required int32 data = 2;		//Anturidata
+    required float data = 2;		//Anturidata
     required string timeStamp = 3;
 }
 

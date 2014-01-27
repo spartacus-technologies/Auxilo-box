@@ -136,6 +136,7 @@ int main(int argc, char const *argv[])
 
 					//KOMMUNIKAATION TESTAUSTA VARTEN!
 					//-------------------------------------
+					/*
 					auxilo::DataMessage datamsg;
 				   	datamsg.set_hardwareid(data.sensorID);
 				   	datamsg.set_data(data.value);
@@ -147,6 +148,7 @@ int main(int argc, char const *argv[])
 
 	   				comm.sendMessage(ans);
 	   				cout << "message sent" << endl;
+	   				*/
 	   				//-------------------------------------
 
 	   				writeLog(data.sensorID, data.read_time, data.value);
