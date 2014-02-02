@@ -153,6 +153,7 @@ chmod u+x Sensors/Switch/wiringPi/build
 chmod u+x CLEAN.sh
 chmod u+x Wlan/connect.sh
 chmod u+x Wlan/scan.sh
+chmod u+x Helpfunctions/date_diff_sec.sh
 
 
 # load necessary kernel modules in boot and now
@@ -203,9 +204,9 @@ cd ../../..
 echo "Making software"
 
 #generate protobuf c++ classes
-cd Communications/
-protoc --cpp_out=. protocol.proto
-cd ../
+cd Communications/Protocol/
+protoc --cpp_out=../. Protocol.proto
+cd ../../
 
 cmake CMakeLists.txt > output.txt 2>&1 &
 
@@ -242,5 +243,6 @@ rm output.txt
 
 echo -e "\n\nExecutables are in subfolder \"bin\""
 
-mkdir log
+mkdir log > /dev/null 2>&1 
+
 exit 0

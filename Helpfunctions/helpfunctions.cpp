@@ -65,13 +65,15 @@ namespace Help
 
 	std::string getCurrentTime()
 	{
-	    time_t rawtime;
-	    struct tm * timeinfo;
+		return runCommand("date  +\"%Y.%m.%d-%R:%S\" | tr -d \"\n\"");
 
-	    time(&rawtime);
-	    timeinfo = localtime(&rawtime);
-	    std::string time_temp = asctime(timeinfo);
-	    return time_temp.substr(0,time_temp.size()-1);
+	    // time_t rawtime;
+	    // struct tm * timeinfo;
+
+	    // time(&rawtime);
+	    // timeinfo = localtime(&rawtime);
+	    // std::string time_temp = asctime(timeinfo);
+	    // return time_temp.substr(0,time_temp.size()-1);
 	}
 
 	std::string readLastNLinesFromFile(std::string file, int lines)
@@ -87,5 +89,18 @@ namespace Help
 		}
 
 		return output;
+	}
+
+	int differenceBetweenDatesInSec(std::string d1, std::string d2)
+	{
+		return strToInt( runCommand("Helpfunctions/date_diff_sec.sh " + d1 + " " + d2) );
+	}
+
+	bool compareDates (std::string isThisNewerThan, std::string This)
+	{
+		if (differenceBetweenDatesInSec( isThisNewerThan, This ) >= 0)
+			return true;
+
+		return false;
 	}
 }

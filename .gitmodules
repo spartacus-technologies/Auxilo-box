@@ -1,0 +1,3 @@
+[submodule "Communications/Protocol"]
+	path = Communications/Protocol
+	url = http://95.85.11.190/auxilo-prototype/protobufdefinitions.git

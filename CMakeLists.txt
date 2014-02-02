@@ -104,7 +104,7 @@ set(DEVICES_SRCS
 
 # List of protobuf .proto's
 set(LIBNETWORK_PROTOS
-    Communications/protocol.proto
+    Communications/Protocol/Protocol.proto
 )
 
 # List of source files
@@ -119,8 +119,8 @@ set(LIBNETWORK_SRCS
     Communications/ClientObserver.hpp
     Communications/SocketMessage.cpp
     Communications/SocketMessage.hpp
-    Communications/protocol.pb.cc
-    Communications/protocol.pb.h
+    Communications/Protocol.pb.cc
+    Communications/Protocol.pb.h
     ${LIBNETWORK_PROTOS}
 )
 

@@ -7,7 +7,7 @@
 const std::string SERVERIPADDRESS = "95.85.11.190";
 const std::string PORT = "8081";
 
-#include "protocol.pb.h"
+#include "Protocol.pb.h"
 
 class ClientWrapper;
 

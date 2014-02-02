@@ -14,13 +14,6 @@
 
 using namespace std;
 
-// Viestit dequeen, josta ne lähetetään säikeessä. Näin ollen viestit eivät mene hukkaan, mikäli
-// netti katkeaa hetkeksi ja ohjelma ei mene jumiin, jos lähettäminen kestää. Ehkä communications 
-// luokkaan?
-
-// Pääsilmukassa tarkastetaan anturien arvoja ja arvot tallennetaan tiedostoon (csv), jonka 
-// nimenä on anturin id. Jos anturin arvoa halutaan, niin luetaan oikeasta id:stä viimonen rivi
-// tai koko tiedosto.
 
 bool initSensors(vector<Sensor*>* sensors);
 void writeLog(const string& sensor_id, const string& date, float value);
@@ -31,16 +24,21 @@ const string BOXID = "1";
 const string LOGDIR = "log/";
 const string LOGFILETYPE = ".csv";
 
+const int MAIN_LOOP_DELAY = 1;
+const int THERM_CHECK_DELAY = 60*15/MAIN_LOOP_DELAY; //in seconds
+
+
 int main(int argc, char const *argv[])
 {
+
 	NexaPlug::initRF();
 	NexaPlug* nexa = new NexaPlug (1);
 
 	vector<Sensor*> sensors; 
 	initSensors(&sensors);
 
-    //// Communications
-
+    //// Initialize Communications
+	//------------------------------------------------------
     // Create DeviceList to be sent to the server.
     auxilo::DeviceList listOfDevices;
 
@@ -92,17 +90,20 @@ int main(int argc, char const *argv[])
     // (*newDevice->mutable_aliasname()) = "Human readable entry";
 
     //When all devices are in the list, send it to server and complete the handshake.
-    cout << "comm tehdään" << endl;
     Communications comm;
-    cout << "comm init" << endl;
     comm.initiate(listOfDevices);
-	cout << "comm valmis" << endl;
-    //// Communications initialized.
+    // Communications initialized.
+    //------------------------------------------------------
 
+	int therm_check = THERM_CHECK_DELAY;
+
+	//**********************
+	//		MAIN LOOP 
+	//**********************
 	while (true)
 	{
 
-		sleep(10);
+		sleep(MAIN_LOOP_DELAY);
 
 		//Check sensor data
 		for(unsigned i = 0; i < sensors.size(); ++i)
@@ -113,21 +114,24 @@ int main(int argc, char const *argv[])
 			// //Tai sitten ei.
 			// //-------------------------------------------------------------------------------
 
-			// Switch* pir = dynamic_cast<Switch*>( sensors.at(i) );
-			// if ( pir != 0 and data.isSuccessful )
-			// {
-			// 	if (nexa->isSocketOn())
-			// 	{
-			// 		nexa->socketOff();
-			// 	}
-			// 	else
-			// 	{
-			// 		nexa->socketOn();
-			// 	}
-			// }
+			Switch* pir = dynamic_cast<Switch*>( sensors.at(i) );
+			if ( pir != 0 and data.isSuccessful )
+			{
+				if (nexa->isSocketOn())
+				{
+					nexa->socketOff();
+				}
+				else
+				{
+					nexa->socketOn();
+				}
+
+				cout << "PIR räjähti" << endl;
+				writeLog(data.sensorID, data.read_time, 1);
+			}
 
 			Thermometer* therm = dynamic_cast<Thermometer*>( sensors.at(i) );
-			if (therm != 0 and data.isSuccessful)
+			if (therm != 0 and therm_check >= THERM_CHECK_DELAY)
 			{
 				if (data.isSuccessful)
 				{
@@ -152,13 +156,8 @@ int main(int argc, char const *argv[])
 	   				//-------------------------------------
 
 	   				writeLog(data.sensorID, data.read_time, data.value);
+	   				therm_check = 0;
 
-	   				//TESTI:
-	   				// string last_result = Help::readLastNLinesFromFile(LOGDIR + data.sensorID+LOGFILETYPE);
-
-	   				// std::cout << last_result << std::endl;
-	   				// cout << "Value: " << getValueFromLogLine(last_result) << endl;
-	   				// cout << "Date: " << getDateFromLogLine(last_result) << endl;
 				}
 				else
 				{
@@ -166,46 +165,95 @@ int main(int argc, char const *argv[])
 				}
 			}
 
+			++therm_check;
+
 			//-------------------------------------------------------------------------------
 
 		}
-
-		
-
 
 		//Read new messages
 		cout << "check mailbox" << endl;
 		auxilo::Message msg;
 		while ( comm.getMessage(msg) )
 		{
-			cout << "new message!!!" << endl;
+			  cout << "new message!!!" << endl;
+			  auxilo::Message ans;
+			  ans.set_senderdevicename(BOXID);
+			  ans.set_receiverdevicename(msg.receiverdevicename());
+
 			  //Query for sensors
-			  if ( msg.has_qry() and msg.qry().has_sensorid() )
+			  if ( msg.has_qry() )
 			  {
-			   		string sensorID = msg.qry().sensorid();
+			  		auxilo::QueryMessageList qml = msg.qry();
 
-			   		string last_result = Help::readLastNLinesFromFile(LOGDIR + sensorID+LOGFILETYPE);
+			  		cout << "Sensor query count: " << qml.query_size() << endl;
 
-			   		if (!last_result.empty())
-			   		{
-			   			float value = getValueFromLogLine(last_result);
-			   			string date = getDateFromLogLine(last_result);
+			  		//List of data of all the required senosors to be send to the server
+			  		auxilo::SensorDataList sensordatalist;
 
-			   			//Create message...
-			   			auxilo::DataMessage datamsg;
-			   			datamsg.set_hardwareid(sensorID);
-			   			datamsg.set_data(value);
-			   			datamsg.set_timestamp(date);
+			  		//Process all queries
+			  		for ( int i = 0; i < qml.query_size(); ++i )
+			  		{
+			  			auxilo::QueryMessage qry = qml.query(i);
 
-		   				auxilo::Message ans;
-		   				ans.set_devicename(BOXID);
-		   				(*ans.mutable_datamesg()) = datamsg;
+			  			string sensorID = qry.sensorid();
 
-		   				//... and send it.
-		   				comm.sendMessage(ans);
-			   		}
+			  			vector<std::string> sensor_values;
+
+			  			// line_count to be read from the logfile
+			  			int line_count = 1;
+
+			  			if ( qry.has_latestdate() )
+			  			{
+			  				//TODO: PIRRIÄ EI VIELÄ OTETA HUOMIOON
+			  				int possible_count = Help::differenceBetweenDatesInSec( Help::getCurrentTime(), qry.latestdate() ) / THERM_CHECK_DELAY;
+
+			  				if (possible_count >= 1)
+			  				{
+			  					line_count += possible_count;
+			  				}
+			  			}
+
+				   		string results = Help::readLastNLinesFromFile(LOGDIR + sensorID+LOGFILETYPE, line_count);
+
+				   		//Parse results and push them to the sensordatalist
+				   		while ( results.length() > 0 )
+				   		{
+				   			//Get one line from string
+				   			unsigned delimeter_pos = results.find("\n");
+
+							if ( delimeter_pos < 1 ) break;
+
+							string result = results.substr(0, delimeter_pos);
+
+							results.erase(0, delimeter_pos + 1);
+
+							
+				   			string date = getDateFromLogLine(result);
+
+				   			// if date in log is older than date in query, ingnore it.
+				   			if ( Help::compareDates( qry.latestdate(), date ))
+				   				continue;
+
+							float value = getValueFromLogLine(result);	
+							auxilo::DataMessage* datamsg = sensordatalist.add_sensordata();
+				   			datamsg->set_hardwareid(sensorID);
+				   			datamsg->set_data(value);
+				   			datamsg->set_timestamp(date);
+				   		}
+
+			  		}
+
+			  		( *ans.mutable_sensordatalist() ) = sensordatalist;
 
 			  }
+			  else if ( msg.has_device_command() )
+			  {
+			  		cout << "Device cmd" << endl;
+			  }
+
+			  //Send the answer
+			  comm.sendMessage(ans);
 		}
 
 		

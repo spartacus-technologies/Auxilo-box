@@ -4,7 +4,7 @@
 #include <iostream>
 #include <thread>
 #include <boost/asio.hpp>
-#include "protocol.pb.h"
+#include "Protocol.pb.h"
 #include "Client.hpp"
 
 int32_t const PROTOCOL_INITIALIZATION_MESSAGE = 0;

@@ -3,7 +3,7 @@
 
 
 #include <boost/asio.hpp>
-#include "protocol.pb.h"
+#include "Protocol.pb.h"
 #include "SocketMessage.hpp"
 
 #include <mutex>

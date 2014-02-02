@@ -1,7 +1,7 @@
 #ifndef CLIENTOBSERVER_HPP
 #define CLIENTOBSERVER_HPP
 
-#include "protocol.pb.h"
+#include "Protocol.pb.h"
 
 // This class can be used to implement the observer functionality to
 // client side application code, which uses this network 'library'.
