@@ -1,18 +1,20 @@
 #include "Client.hpp"
 #include "ClientWrapper.hpp"
 
-#include <stdlib.h> // atoi
-
 
 Client::Client(boost::asio::io_service &io_service,
-               boost::asio::ip::tcp::resolver::iterator endpoint_iterator, ClientWrapper *wrapper):
-    io_service_(io_service), socket_(io_service), wrapper_(wrapper)
+               boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
+               ClientWrapper *wrapper):
+    socket_(io_service), wrapper_(wrapper)
 {
     do_connect(endpoint_iterator);
 }
 
 Client::~Client()
 {
+    std::cout << "Closing socket." << std::endl;
+    boost::system::error_code ignored_ec;
+    socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
 }
 
 void Client::do_connect(boost::asio::ip::tcp::resolver::iterator
@@ -30,49 +32,13 @@ void Client::do_connect(boost::asio::ip::tcp::resolver::iterator
           do_read_header();
       }
       else
+      {
           std::cout << "Error: " << ec << std::endl;
+      }
    });
 }
 
-bool Client::initiateConnection(std::string& msg)
-{
 
-    SocketMessage message;
-    message.setType(0);
-    message.setLength(msg.size());
-    std::memcpy(message.dataBuffer(), msg.c_str(), msg.length());
-    message.encodeHeader();
-    boost::system::error_code ec;
-    boost::asio::write(socket_, boost::asio::buffer(message.headerBuffer(),
-                                                    message.getLength()+ SocketMessage::HEADER_LENGTH),
-        boost::asio::transfer_all(), ec);
-
-    // Wait for ACK
-    // TODO
-    return true;
-}
-
-
-void Client::end_session()
-{
-    std::cout << "Terminating server session." << std::endl;
-    SocketMessage message;
-    message.setType(1000);
-    message.encodeHeader();
-
-
-    bool containerEmpty = false;
-    {
-        std::lock_guard<std::mutex> guard(msgBufferMutex_);
-        containerEmpty = msgBuffer_.empty();
-        msgBuffer_.push_back(message);
-    }
-
-    if (containerEmpty)
-    {
-        do_write();
-    }
-}
 
 void Client::do_read_header()
 {
@@ -85,18 +51,6 @@ void Client::do_read_header()
          {
              // Decode received header
              message_receive_.decodeHeader();
-             // Check for connection terminate messages
-             if( message_receive_.getType() == 1000 )
-             {
-                 // Terminate this session
-                 // TODO
-                 //socket_.close();
-             }
-             // Check for ACK
-             else if( message_receive_.getType() == 10 )
-             {
-
-             }
 
              do_read_data();
          }
@@ -111,14 +65,22 @@ void Client::do_read_data()
 {
 
     boost::asio::async_read(socket_,
-            boost::asio::buffer(message_receive_.dataBuffer(), message_receive_.getLength()),
+            boost::asio::buffer(message_receive_.dataBuffer(),
+                                message_receive_.getLength()),
             [this](boost::system::error_code ec, std::size_t /*length*/)
             {
                 if (!ec)
                 {
                     // Data received
-                    std::string message = message_receive_.dataBuffer();
-                    wrapper_->deliverMessage(message);
+                    std::string tmp;
+                    for(unsigned i = 0; i < message_receive_.getLength(); ++i)
+                    {
+                        tmp += message_receive_.dataBuffer()[i];
+                    }
+                    std::cout << "received message with length " <<
+                                 message_receive_.getLength() << std::endl;
+
+                    wrapper_->deliverMessage(tmp, message_receive_.getType());
                     do_read_header();
                 }
                 else
@@ -141,7 +103,6 @@ void Client::sendMessage(std::string msg, int32_t type)
     message.setType(type);
     message.encodeHeader();
 
-
     bool containerEmpty = false;
     {
         std::lock_guard<std::mutex> guard(msgBufferMutex_);
@@ -157,23 +118,17 @@ void Client::sendMessage(std::string msg, int32_t type)
 
 void Client::do_write()
 {
-    boost::asio::async_write(socket_,
-                             boost::asio::buffer(msgBuffer_.front().headerBuffer(),
-                                                 msgBuffer_.front().getLength()+ SocketMessage::HEADER_LENGTH),
+    boost::asio::async_write(socket_, boost::asio::buffer(msgBuffer_.front().
+                             headerBuffer(), msgBuffer_.front().getLength() +
+                             SocketMessage::HEADER_LENGTH),
         [this](boost::system::error_code ec, std::size_t)
         {
           if (!ec)
           {
               std::lock_guard<std::mutex> guard(msgBufferMutex_);
-              std::cout << "sending message with length " << msgBuffer_.front().getLength() << std::endl;
+              std::cout << "sending message with length " << msgBuffer_.
+                           front().getLength() << std::endl;
 
-
-              std::cout << "Print the message:" << std::endl;
-              for( unsigned i = 0; i < msgBuffer_.front().getLength() + 8; ++i)
-              {
-                  int ij = static_cast<int> (msgBuffer_.front().headerBuffer()[i]);
-                  std::cout << "char[" << i << "]: " << msgBuffer_.front().headerBuffer()[i] << " (" << ij << ")" << std::endl;
-              }
 
               msgBuffer_.pop_front();
 

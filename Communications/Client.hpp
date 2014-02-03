@@ -3,7 +3,6 @@
 
 
 #include <boost/asio.hpp>
-#include "Protocol.pb.h"
 #include "SocketMessage.hpp"
 
 #include <mutex>
@@ -19,14 +18,8 @@ class Client
         Client(boost::asio::io_service& io_service,
                boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
                ClientWrapper* wrapper);
+
         ~Client();
-
-        // Makes the initial hand shake with the server. Parameter need to
-        // be valid HelloRequest message.
-        bool initiateConnection(std::string& msg);
-
-        // Terminates this session with server.
-        void end_session();
 
         // Send serialized message to server
         void sendMessage(std::string msg, int32_t type);
@@ -44,8 +37,6 @@ class Client
 
         // Assynchronically read data
         void do_read_data();
-
-        boost::asio::io_service& io_service_;
 
         boost::asio::ip::tcp::socket socket_;
 

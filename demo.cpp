@@ -20,7 +20,7 @@ void writeLog(const string& sensor_id, const string& date, float value);
 string getDateFromLogLine(const string& line);
 float getValueFromLogLine(const string& line);
 
-const string BOXID = "1";
+const string BOXID = "TESTIBOXI";
 const string LOGDIR = "log/";
 const string LOGFILETYPE = ".csv";
 
@@ -179,7 +179,7 @@ int main(int argc, char const *argv[])
 			  cout << "new message!!!" << endl;
 			  auxilo::Message ans;
 			  ans.set_senderdevicename(BOXID);
-			  ans.set_receiverdevicename(msg.receiverdevicename());
+			  ans.set_receiverdevicename(msg.senderdevicename());
 
 			  //Query for sensors
 			  if ( msg.has_qry() )
@@ -245,9 +245,10 @@ int main(int argc, char const *argv[])
 			  		}
 
 			  		( *ans.mutable_sensordatalist() ) = sensordatalist;
+                    cout << "DATASIZE " << sensordatalist.sensordata_size() << endl;
 
 			  }
-			  else if ( msg.has_device_command() )
+			  if ( msg.has_device_command() )
 			  {
 			  		cout << "Device cmd" << endl;
 			  }
