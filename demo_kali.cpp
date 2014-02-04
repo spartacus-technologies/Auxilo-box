@@ -7,7 +7,6 @@ using namespace std;
 
 int main(int argc, char const *argv[])
 {
-	NexaPlug::initRF();
 	NexaPlug* nexa = new NexaPlug (1);
 	Switch* pir = 0;
 	string input;

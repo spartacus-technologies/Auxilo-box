@@ -26,8 +26,6 @@ public:
     void socketOn();
     void socketOff();
 	bool isSocketOn();
-
-	static void initRF();
 	
 private:
 	
@@ -43,9 +41,11 @@ private:
     
 	static const uint8_t brand_;
 
-	void sendPacket(uint8_t state, uint8_t  repeats = 5);
+	void sendPacket(uint8_t state, uint8_t  repeats = 20);
 
 	auxilo::deviceState deviceStatus;
+
+	void initRF();
 };
 
 #endif // NEXAPLUGS_HH

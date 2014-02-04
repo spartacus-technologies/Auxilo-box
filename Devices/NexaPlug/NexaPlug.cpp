@@ -30,6 +30,7 @@ NexaPlug::~NexaPlug()
 
 void NexaPlug::sendPacket(uint8_t state, uint8_t  repeats)
 {
+	initRF();
 	uint64_t data = 0;
 	state_ = state;
 	/* Fill the data-variable and call the TX-function */
@@ -117,5 +118,5 @@ std::string NexaPlug::getID() const
 
 void NexaPlug::initialize()
 {
-	initRF();
+	//Nothing to do here really...
 }

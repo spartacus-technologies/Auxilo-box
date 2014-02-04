@@ -152,7 +152,7 @@ add_library(wlan ${WLAN_SRC})
 
 add_executable(demo demo.cpp)
 add_executable(nexa_pair nexa_pair.cpp)
-
+add_executable(demo_kali demo_kali.cpp)
 #target_link_libraries(rasp_prog network box)
 
 # target_link_libraries(demo box)
@@ -163,6 +163,8 @@ target_link_libraries(demo network)
 
 target_link_libraries(nexa_pair nexa)
 
+target_link_libraries(demo_kali nexa)
+target_link_libraries(demo_kali sensors)
 #target_link_libraries(rasp_prog network)
 
 # target_link_libraries(demo util)

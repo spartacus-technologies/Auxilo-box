@@ -7,8 +7,6 @@ using namespace std;
 
 int main(int argc, char const *argv[])
 {
-	NexaPlug::initRF();
-
 
 	int id = 1;
 	if(argc == 2)
