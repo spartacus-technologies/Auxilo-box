@@ -1,6 +1,7 @@
 #include "NexaPlug.hh"
 #include "nexa.h"
 #include "radio.h"
+#include "../../Helpfunctions/helpfunctions.hh"
 
 #include <iostream>
 #include <stdlib.h>
@@ -16,6 +17,7 @@ NexaPlug::NexaPlug(unsigned int id):
 			repeats_(5)
 {
 	std::cout << "Luotiin NexaPlug idlla: " << id_ <<"\n";
+	deviceStatus = auxilo::deviceState::unknown;
 }
 
 NexaPlug::~NexaPlug()
@@ -47,11 +49,15 @@ void NexaPlug::sendPacket(uint8_t state, uint8_t  repeats)
 void NexaPlug::socketOn()
 {
 	sendPacket(1);
+	deviceStatus = auxilo::deviceState::on;
+	std::cout << "nexa " << id_  << " socketOn "<<"\n";
 }
 
 void NexaPlug::socketOff()
 {
 	sendPacket(0);
+	deviceStatus = auxilo::deviceState::off;
+	std::cout << "nexa " << id_  << " socketOFF "<<"\n";
 }
 
 bool NexaPlug::isSocketOn()
@@ -80,4 +86,36 @@ void NexaPlug::initRF()
 	setup_io();
 	setup_fm();
 	ACCESS(CM_GP0DIV, getAllof()) = (0x5a << 24) + 0x374F; // Tune to 144.64 MHz to get the third harmonic at 433.92 MHz
+}
+
+void NexaPlug::setStatus(auxilo::deviceState status)
+{
+	switch (status)
+	{
+		case auxilo::deviceState::on:
+		socketOn();
+		break;
+
+		case auxilo::deviceState::off:
+		socketOff();
+		break;
+
+		default:
+		break;
+	}
+}
+auxilo::deviceState NexaPlug::getStatus() const
+{
+	return deviceStatus;
+}
+
+std::string NexaPlug::getID() const
+{
+	std::cout << "NexaPlug::getID(): " << "NECAAAAAAA " + Help::intToStr(id_) <<"\n";
+	return "nexa " + Help::intToStr(id_);
+}
+
+void NexaPlug::initialize()
+{
+	initRF();
 }

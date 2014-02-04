@@ -8,12 +8,12 @@ class Device
 public:
     virtual ~Device(){}
 
-    void initialize() = 0;
+    virtual void initialize() = 0;
 
-    void setStatus(auxilo::DeviceState status) = 0;
-    auxilo::DeviceState getStatus() const = 0;
+    virtual void setStatus(auxilo::deviceState status) = 0;
+    virtual auxilo::deviceState getStatus() const = 0;
 
-    std::string getID() = 0;
+    virtual std::string getID() const = 0;
 
 };
 

@@ -3,7 +3,7 @@
 #include <unistd.h> //sleep
 #include <vector>
 #include <fstream>
-
+#include <map>
 
 #include "Devices/NexaPlug/NexaPlug.hh"
 #include "Sensors/Switch/Switch.hh"
@@ -19,6 +19,7 @@ bool initSensors(vector<Sensor*>* sensors);
 void writeLog(const string& sensor_id, const string& date, float value);
 string getDateFromLogLine(const string& line);
 float getValueFromLogLine(const string& line);
+void initDevices(map<string, Device*> &devices);
 
 const string BOXID = "TESTIBOXI";
 const string LOGDIR = "log/";
@@ -30,12 +31,10 @@ const int THERM_CHECK_DELAY = 60*15/MAIN_LOOP_DELAY; //in seconds
 
 int main(int argc, char const *argv[])
 {
-
-	NexaPlug::initRF();
-	NexaPlug* nexa = new NexaPlug (1);
-
-	vector<Sensor*> sensors; 
+	vector<Sensor*> sensors;
+	map<string, Device*> devices;
 	initSensors(&sensors);
+	initDevices(devices);
 
     //// Initialize Communications
 	//------------------------------------------------------
@@ -86,7 +85,7 @@ int main(int argc, char const *argv[])
     // (*newDevice->mutable_description()) ="Kuvaus";
 
     // DEVICES NEED IDs!!!
-    (*newDevice->mutable_deviceid()) = "NEXA";
+    (*newDevice->mutable_deviceid()) = "nexa 1"; //FIXME
     // (*newDevice->mutable_aliasname()) = "Human readable entry";
 
     //When all devices are in the list, send it to server and complete the handshake.
@@ -117,14 +116,14 @@ int main(int argc, char const *argv[])
 			Switch* pir = dynamic_cast<Switch*>( sensors.at(i) );
 			if ( pir != 0 and data.isSuccessful )
 			{
-				if (nexa->isSocketOn())
-				{
-					nexa->socketOff();
-				}
-				else
-				{
-					nexa->socketOn();
-				}
+				// if (nexa->isSocketOn())
+				// {
+				// 	nexa->socketOff();
+				// }
+				// else
+				// {
+				// 	nexa->socketOn();
+				// }
 
 				cout << "PIR räjähti" << endl;
 				writeLog(data.sensorID, data.read_time, 1);
@@ -257,7 +256,16 @@ int main(int argc, char const *argv[])
 			  		auxilo::DeviceStatus ds;
 			  		ds.set_deviceid(devID);
 
-			  		//TODO: Devices to map!!!
+			  		cout << "HAKUAVAIN " <<  devID << endl;
+
+			  		//Find pointer to the device
+			  		std::map<std::string, Device*>::iterator devItr = devices.find(devID);
+			  		
+			  		//Device not found, should not happen
+			  		if(devItr == devices.end())
+			  		{
+			  			std::cerr << "Device not found" << std::endl; //FIXME
+			  		}
 
 			  		if (cmd.has_setstatus())
 			  		{
@@ -265,43 +273,26 @@ int main(int argc, char const *argv[])
 			  			{
 			  			case auxilo::deviceState::on:
 							  cout << "Set device on" << endl;
-							  // ds.set_status(auxilo::deviceState::on);
+							  (*devItr).second->setStatus(auxilo::deviceState::on);
 							  break;
 						case auxilo::deviceState::off:
 							  cout << "Set device off" << endl;
-							  // ds.set_status(auxilo::deviceState::off);
+							  (*devItr).second->setStatus(auxilo::deviceState::off);
 							  break;
 						default:
-							  cout << "Unknown state" << endl;
-							  // ds.set_status(auxilo::deviceState::unknown);
+							  cout << "Unknown status" << endl;
 							  break;
 			  			}
-
-
 			  		}
 
-//Device rajapintaan getStatus paluuarvoksi samointein tuo auxilo::DeviceState
-			  		//ds.set_status(device.getStatus());
-							 
-			  		// else if (cmd.has_getstatus())
-			  		// {
-			  		// 	
-			  		// }
-			  		// else
-			  		// {
-			  		// 	cout << "There was no commands..." << endl;
-			  		// }
+			  		ds.set_status((*devItr).second->getStatus());
 
 			  		( *ans.mutable_device_status() ) = ds;
 			  }
 
-
 			  //Send the answer
 			  comm.sendMessage(ans);
 		}
-
-		
-
 	}
 
 	return 0;
@@ -381,4 +372,12 @@ float getValueFromLogLine(const string& line)
 
 	return Help::strToFloat(line.substr(delimeter_pos+1));
 
+}
+
+void initDevices(map<string, Device*> &devices)
+{
+	Device* nexa = new NexaPlug (1);
+	cout << "NEXAN ID = " << nexa->getID() << endl;
+	nexa->initialize();
+	devices.insert(pair<string, Device*>(nexa->getID(), nexa));
 }

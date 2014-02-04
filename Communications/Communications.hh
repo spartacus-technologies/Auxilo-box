@@ -5,6 +5,7 @@
 #include <memory>
 
 const std::string SERVERIPADDRESS = "95.85.11.190";
+// const std::string SERVERIPADDRESS = "94.237.70.252";
 const std::string PORT = "8081";
 
 #include "Protocol.pb.h"

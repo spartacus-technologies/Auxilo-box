@@ -5,11 +5,17 @@
 //#include <map>
 #include <inttypes.h>
 
+#include "../Device.hh"
+
 using namespace std;
 
-class NexaPlug
+class NexaPlug : public Device
 {
 public:
+	void initialize();
+	void setStatus(auxilo::deviceState status);
+	auxilo::deviceState getStatus() const;
+	std::string getID() const;
     
     NexaPlug(unsigned int id);
     ~NexaPlug();
@@ -38,6 +44,8 @@ private:
 	static const uint8_t brand_;
 
 	void sendPacket(uint8_t state, uint8_t  repeats = 5);
+
+	auxilo::deviceState deviceStatus;
 };
 
 #endif // NEXAPLUGS_HH

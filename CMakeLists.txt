@@ -85,6 +85,8 @@ set(NEXA_SRCS
 	Devices/NexaPlug/NexaPlug.hh
 	Devices/NexaPlug/NexaPlug.cpp
 	Devices/Device.hh
+	Helpfunctions/helpfunctions.cpp
+	Helpfunctions/helpfunctions.hh   #FIXME
 )
 
 set(DEVICES_SRCS
