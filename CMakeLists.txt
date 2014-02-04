@@ -84,9 +84,11 @@ set(NEXA_SRCS
 	Devices/NexaPlug/nexa.h
 	Devices/NexaPlug/NexaPlug.hh
 	Devices/NexaPlug/NexaPlug.cpp
+	Devices/Device.hh
 )
 
 set(DEVICES_SRCS
+	Devices/Device.hh
 	Devices/Plugs/Plugs.cpp
 	Devices/Plugs/Plugs.hh
 	Devices/Speaker/Speaker.cpp

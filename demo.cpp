@@ -251,7 +251,50 @@ int main(int argc, char const *argv[])
 			  if ( msg.has_device_command() )
 			  {
 			  		cout << "Device cmd" << endl;
+			  		auxilo::DeviceCommand cmd = msg.device_command();
+			  		string devID = cmd.deviceid();
+
+			  		auxilo::DeviceStatus ds;
+			  		ds.set_deviceid(devID);
+
+			  		//TODO: Devices to map!!!
+
+			  		if (cmd.has_setstatus())
+			  		{
+			  			switch (cmd.setstatus())
+			  			{
+			  			case auxilo::deviceState::on:
+							  cout << "Set device on" << endl;
+							  // ds.set_status(auxilo::deviceState::on);
+							  break;
+						case auxilo::deviceState::off:
+							  cout << "Set device off" << endl;
+							  // ds.set_status(auxilo::deviceState::off);
+							  break;
+						default:
+							  cout << "Unknown state" << endl;
+							  // ds.set_status(auxilo::deviceState::unknown);
+							  break;
+			  			}
+
+
+			  		}
+
+//Device rajapintaan getStatus paluuarvoksi samointein tuo auxilo::DeviceState
+			  		//ds.set_status(device.getStatus());
+							 
+			  		// else if (cmd.has_getstatus())
+			  		// {
+			  		// 	
+			  		// }
+			  		// else
+			  		// {
+			  		// 	cout << "There was no commands..." << endl;
+			  		// }
+
+			  		( *ans.mutable_device_status() ) = ds;
 			  }
+
 
 			  //Send the answer
 			  comm.sendMessage(ans);
