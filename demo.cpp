@@ -197,6 +197,8 @@ int main(int argc, char const *argv[])
 
 			  			string sensorID = qry.sensorid();
 
+			  			cout << "SENSORID = " << sensorID << endl;
+
 			  			vector<std::string> sensor_values;
 
 			  			// line_count to be read from the logfile
@@ -214,10 +216,14 @@ int main(int argc, char const *argv[])
 			  			}
 
 				   		string results = Help::readLastNLinesFromFile(LOGDIR + sensorID+LOGFILETYPE, line_count);
+				   		
+				   		cout << "Linecount = " << line_count << endl;
+				   		cout << "Result = " << results << endl;
 
 				   		//Parse results and push them to the sensordatalist
 				   		while ( results.length() > 0 )
 				   		{
+				   			cout << "OLEN WHILESSÄ" << endl;
 				   			//Get one line from string
 				   			unsigned delimeter_pos = results.find("\n");
 
@@ -231,7 +237,7 @@ int main(int argc, char const *argv[])
 				   			string date = getDateFromLogLine(result);
 
 				   			// if date in log is older than date in query, ingnore it.
-				   			if ( Help::compareDates( qry.latestdate(), date ))
+				   			if ( qry.has_latestdate() and Help::compareDates( qry.latestdate(), date ))
 				   				continue;
 
 							float value = getValueFromLogLine(result);	
@@ -239,6 +245,7 @@ int main(int argc, char const *argv[])
 				   			datamsg->set_hardwareid(sensorID);
 				   			datamsg->set_data(value);
 				   			datamsg->set_timestamp(date);
+				   			cout << "SENSORID = " << sensorID  << "    :    " << value << endl;
 				   		}
 
 			  		}

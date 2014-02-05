@@ -3,6 +3,7 @@
 
 //DEBUG
 #include <iostream>
+#include "../../Helpfunctions/helpfunctions.hh"
 
 #define TEST_SWITCH_PIN 1
 
@@ -37,7 +38,7 @@ void Switch::changeSensorStatus(bool status, std::string sensorTime)
 
 static void interruptHandler()
 {
-	Switch::changeSensorStatus(true, "00:00");
+	Switch::changeSensorStatus(true, Help::getCurrentTime());
 
     //Debug tuloste
 	std::cout << "PIR havaitsee liiketta" << std::endl;
