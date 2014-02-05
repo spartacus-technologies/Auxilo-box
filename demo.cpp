@@ -89,8 +89,8 @@ int main(int argc, char const *argv[])
     // (*newDevice->mutable_aliasname()) = "Human readable entry";
 
     //When all devices are in the list, send it to server and complete the handshake.
-    Communications comm;
-    comm.initiate(listOfDevices);
+    Communications* comm = new Communications();
+    comm->initiate(listOfDevices);
     // Communications initialized.
     //------------------------------------------------------
 
@@ -103,6 +103,7 @@ int main(int argc, char const *argv[])
 	{
 
 		sleep(MAIN_LOOP_DELAY);
+
 
 		//Check sensor data
 		for(unsigned i = 0; i < sensors.size(); ++i)
@@ -170,10 +171,20 @@ int main(int argc, char const *argv[])
 
 		}
 
+		if ( !comm->communicationStatus() )
+		{
+			cout << "Yhteys katkesi" << endl;
+			delete comm;
+			comm = new Communications();
+			
+			if (comm->initiate(listOfDevices)) 
+				continue;
+		}
+
 		//Read new messages
 		cout << "check mailbox" << endl;
 		auxilo::Message msg;
-		while ( comm.getMessage(msg) )
+		while ( comm->getMessage(msg) )
 		{
 			  cout << "new message!!!" << endl;
 			  auxilo::Message ans;
@@ -298,7 +309,7 @@ int main(int argc, char const *argv[])
 			  }
 
 			  //Send the answer
-			  comm.sendMessage(ans);
+			  comm->sendMessage(ans);
 		}
 	}
 

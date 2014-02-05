@@ -18,11 +18,13 @@ class Communications
         Communications();
         ~Communications();
 
-        void initiate(auxilo::DeviceList list);
+        bool initiate(auxilo::DeviceList list);
 
         void sendMessage(auxilo::Message& msg);
 
         bool getMessage(auxilo::Message &msg);
+
+        bool communicationStatus();
 
     private:
 

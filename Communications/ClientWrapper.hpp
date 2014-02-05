@@ -43,6 +43,9 @@ class ClientWrapper
 
         // Call back function from Client.
         void deliverMessage(std::string &msg, uint32_t type);
+        void terminate();
+
+        bool connectionStatus ();
 
     private:
 

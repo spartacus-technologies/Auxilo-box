@@ -14,7 +14,7 @@ Communications::~Communications()
 
 }
 
-void Communications::initiate(auxilo::DeviceList list)
+bool Communications::initiate(auxilo::DeviceList list)
 {
     // Lets save client identifiers locally first. Later when we get more
     // things going on the server we can implement web UI for customers to set
@@ -22,7 +22,7 @@ void Communications::initiate(auxilo::DeviceList list)
     std::filebuf configRead;
     if (!configRead.open ("config.cfg", std::ios::in)) {
         std::cerr << "Error while opening the config file." << std::endl;
-        return;
+        return false;
     }
     std::istream is(&configRead);
     std::string customerID;
@@ -44,7 +44,7 @@ void Communications::initiate(auxilo::DeviceList list)
         if(boxClient.empty())
         {
             std::cerr << "Too few lines in the config file." << std::endl;
-            return;
+            return false;
         }
     }
     std::cout << " OK. Following configs read" << std::endl;
@@ -62,12 +62,14 @@ void Communications::initiate(auxilo::DeviceList list)
     if( !clientWrapper_->initiateConnection(customerID,deviceName,isBox))
     {
         std::cerr << "Client error: Server name not resolvable." << std::endl;
+        return false;
     }
 
     // Send DeviceList
     clientWrapper_->sendDeviceList(list);
 
     // Handshake with the server should be OK.
+    return true;
 }
 
 void Communications::sendMessage(auxilo::Message &msg)
@@ -78,4 +80,9 @@ void Communications::sendMessage(auxilo::Message &msg)
 bool Communications::getMessage(auxilo::Message &msg)
 {
     return clientWrapper_->getLastMessage(msg);
+}
+
+bool Communications::communicationStatus()
+{
+    return clientWrapper_->connectionStatus ();
 }

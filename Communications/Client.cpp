@@ -34,6 +34,7 @@ void Client::do_connect(boost::asio::ip::tcp::resolver::iterator
       else
       {
           std::cout << "Error: " << ec << std::endl;
+          wrapper_->terminate();
       }
    });
 }
@@ -56,7 +57,7 @@ void Client::do_read_header()
          }
          else
          {
-           socket_.close();
+           wrapper_->terminate();
          }
        });
 }
@@ -87,6 +88,7 @@ void Client::do_read_data()
                 {
                     // TODO: Drop
                     std::cerr << "Error " << ec << std::endl;
+                    wrapper_->terminate();
                 }
             });
 }
@@ -140,7 +142,7 @@ void Client::do_write()
           else
           {
               std::cerr << "Error: writing to socket " << ec << std::endl;
-              socket_.close();
+              wrapper_->terminate();
           }
         });
 }

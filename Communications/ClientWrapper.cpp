@@ -246,3 +246,13 @@ void ClientWrapper::addObserver(ClientObserver *observer)
 
     observer_ = observer;
 }
+
+bool ClientWrapper::connectionStatus ()
+{
+    return state_ == HelloRequest or state_ == DeviceList or state_ == HandshakeComplete;
+}
+
+void ClientWrapper::terminate()
+{
+    state_ = Finished;
+}
