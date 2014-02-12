@@ -207,7 +207,7 @@ int main(int argc, char const *argv[])
 			  		cout << "Sensor query count: " << qml.query_size() << endl;
 
 			  		//List of data of all the required senosors to be send to the server
-			  		auxilo::SensorDataList sensordatalist;
+			  		auxilo::SensDataList sensordatalist;
 
 			  		//Process all queries
 			  		for ( int i = 0; i < qml.query_size(); ++i )
