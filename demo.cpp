@@ -20,8 +20,9 @@ void writeLog(const string& sensor_id, const string& date, float value);
 string getDateFromLogLine(const string& line);
 float getValueFromLogLine(const string& line);
 void initDevices(map<string, Device*> &devices);
+bool getBoxId();
 
-const string BOXID = "TESTIBOXI";
+static string BOXID = "";
 const string LOGDIR = "log/";
 const string LOGFILETYPE = ".csv";
 
@@ -31,6 +32,13 @@ const int THERM_CHECK_DELAY = 60*15/MAIN_LOOP_DELAY; //in seconds
 
 int main(int argc, char const *argv[])
 {
+	if(!getBoxId())
+	{
+		exit(1);
+	}
+
+	cout << BOXID << "\n";
+
 	vector<Sensor*> sensors;
 	map<string, Device*> devices;
 	initSensors(&sensors);
@@ -398,4 +406,29 @@ void initDevices(map<string, Device*> &devices)
 	cout << "NEXAN ID = " << nexa->getID() << endl;
 	nexa->initialize();
 	devices.insert(pair<string, Device*>(nexa->getID(), nexa));
+}
+
+bool getBoxId()
+{
+	string tempFile = Help::readLastNLinesFromFile("config.cfg",100);
+
+	if(tempFile.empty())
+	{
+		cerr << "config.cfg is empty or not exist.\n";
+		return false;
+	}
+	for(int i=0; i<2;++i)
+	{
+	   	//Get one line from string
+		unsigned delimeter_pos = tempFile.find("\n");
+
+		if ( delimeter_pos < 1 ) break;
+
+		string result = tempFile.substr(0, delimeter_pos);
+
+		BOXID = result;
+
+		tempFile.erase(0, delimeter_pos + 1);
+	}
+	return true;
 }
