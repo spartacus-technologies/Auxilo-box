@@ -90,16 +90,13 @@ bool Thermometer::init()
 	//kahta oliota. Anturit on yksilöity ID -numeroilla (kts. getData()).
 }
 
-//TODO skriptissä jotain bugia. En saanut toimimaan. Polun/nimen antamisessa on jotain vikaa? -Eetu
-//BUGI jossa lämpötilan arvo on väärä korjattu -Erno
-
 Sensor::sensorData Thermometer::getData() const
 {
 	Sensor::sensorData returnValue;
 	//runCommand returns output of a skript as a string and 1000 times too big.
 	//Value is in Celcius. Returns "ERROR" if sensorID is wrong
 	//cout<<"/sys/bus/w1/devices/" + sensorID_<<endl;
-	string temp_str = Help::runCommand("/home/pi/Desktop/Software/Sensors/Thermometer/Thermometer.pl "+ sensorID_);
+	string temp_str = Help::runCommand("Sensors/Thermometer/Thermometer.pl "+ sensorID_);
 
 	int i=0;
 	while ( temp_str == "WRONG_VALUE" or temp_str == "ERROR")
@@ -117,7 +114,7 @@ Sensor::sensorData Thermometer::getData() const
 
 		sleep(1);
 		++i;
-		temp_str = Help::runCommand("/home/pi/Desktop/Software/Sensors/Thermometer/Thermometer.pl "+ sensorID_);
+		temp_str = Help::runCommand("Sensors/Thermometer/Thermometer.pl "+ sensorID_);
 	}
 	
 	returnValue.value = Help::strToInt (temp_str)/ 1000.0;;
@@ -128,12 +125,6 @@ Sensor::sensorData Thermometer::getData() const
 	return returnValue;
 }
 
-// ^^ Olin kans jotain skriptiä aluks miettimässä, mutta C++'ssan Tiedosto IO'lla homma onnistui myös:
-// -Eetu
-// PS tuli vähän kahteen kertaan tehtyä hommaa, kun en huomannut tekemääsi skriptiä.
-
-// Aiempaan viitaten muuten tuossa skriptissä pitänee huomioida anturin yksilöllinen ID, jos halutaan
-// erottaa vaikkapa makuuhuoneen lämpötila olohuoneen lämpötilasta.
 
 /*
 Sensor::sensorData Thermometer::getData() const
