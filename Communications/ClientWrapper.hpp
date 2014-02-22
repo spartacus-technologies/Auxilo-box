@@ -12,6 +12,7 @@
 uint32_t const PROTOCOL_INIT_MESSAGE = 0;
 uint32_t const PROTOCOL_NORMAL_MESSAGE = 1;
 uint32_t const PROTOCOL_ACK_MESSAGE = 10;
+uint32_t const PROTOCOL_HBACK_MESSAGE = 11;
 uint32_t const PROTOCOL_FIN_MESSAGE = 1000;
 
 class ClientObserver;
@@ -43,8 +44,12 @@ class ClientWrapper
 
         // Call back function from Client.
         void deliverMessage(std::string &msg, uint32_t type);
+
+        // Sets connection as finished state, after which
+        // sending or receiving not possible.
         void terminate();
 
+        // Asks if connection is OK.
         bool connectionStatus ();
 
     private:
@@ -57,7 +62,9 @@ class ClientWrapper
 
         ClientObserver* observer_;
 
-        std::mutex msgDequeMutex_;
+        // Mutex prevents thread issues between thread t_ and the thread, which
+        // is using this class.
+        std::mutex libnetworkMutex_;
 
         //FIFO-type round buffer for storing messages send by server.
         std::deque<auxilo::Message> receivedMessages_;

@@ -4,8 +4,8 @@
 
 Client::Client(boost::asio::io_service &io_service,
                boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-               ClientWrapper *wrapper):
-    socket_(io_service), wrapper_(wrapper)
+               ClientWrapper *wrapper): timerState_(IdleWait),
+    socket_(io_service), timer_(io_service), wrapper_(wrapper)
 {
     do_connect(endpoint_iterator);
 }
@@ -21,22 +21,23 @@ void Client::do_connect(boost::asio::ip::tcp::resolver::iterator
                         endpoint_iterator)
 {
 
-   boost::asio::async_connect(socket_, endpoint_iterator,
-       [this](boost::system::error_code ec, boost::asio::ip::tcp::resolver::
-                              iterator)
-   {
+    boost::asio::async_connect(socket_, endpoint_iterator,
+                               [this](boost::system::error_code ec, boost::asio::ip::tcp::resolver::
+                               iterator)
+    {
 
-      if (!ec)
-      {
-          // Read message header.
-          do_read_header();
-      }
-      else
-      {
-          std::cout << "Error: " << ec << std::endl;
-          wrapper_->terminate();
-      }
-   });
+        if (!ec)
+        {
+            // Set heartbeat ack intervall to 15min.
+            resetTimer();
+
+            do_read_header();
+        }
+        else
+        {
+            wrapper_->terminate();
+        }
+    });
 }
 
 
@@ -44,53 +45,84 @@ void Client::do_connect(boost::asio::ip::tcp::resolver::iterator
 void Client::do_read_header()
 {
     boost::asio::async_read(socket_,
-           boost::asio::buffer(message_receive_.headerBuffer(), SocketMessage::
-                               HEADER_LENGTH),
-       [this](boost::system::error_code ec, std::size_t /*length*/)
-       {
-         if (!ec)
-         {
-             // Decode received header
-             message_receive_.decodeHeader();
+                            boost::asio::buffer(message_receive_.headerBuffer(), SocketMessage::
+                                                HEADER_LENGTH),
+                            [this](boost::system::error_code ec, std::size_t /*length*/)
+    {
+        if (!ec)
+        {
+            // Decode received header
+            message_receive_.decodeHeader();
 
-             do_read_data();
-         }
-         else
-         {
-           wrapper_->terminate();
-         }
-       });
+            // Reset timer.
+            resetTimer();
+
+            switch (message_receive_.getType())
+            {
+                case PROTOCOL_HBACK_MESSAGE:
+                {
+                    // Send heartbeat ack back to client as acknowledgement if
+                    // in IdleWait state.
+                    if(timerState_ == IdleWait)
+                    {
+                        std::string tmp;
+                        sendMessage(tmp, PROTOCOL_HBACK_MESSAGE);
+                    }
+                    // Otherwise the HB ack is a response to hb ack send by
+                    // this instance.
+                    else
+                    {
+                        timerState_ = IdleWait;
+                    }
+                    std::cout << "HB ack" << std::endl;
+                    do_read_header();
+                    break;
+                }
+                case PROTOCOL_INIT_MESSAGE:
+                case PROTOCOL_NORMAL_MESSAGE:
+                case PROTOCOL_ACK_MESSAGE:
+                case PROTOCOL_FIN_MESSAGE:
+                {
+                    do_read_data();
+                    break;
+                }
+                default:
+                {
+                    // TODO
+                    break;
+                }
+            }
+        }
+        else
+        {
+            std::cout << "Errors: " << ec << std::endl;
+            wrapper_->terminate();
+        }
+    });
 }
 
 void Client::do_read_data()
 {
 
     boost::asio::async_read(socket_,
-            boost::asio::buffer(message_receive_.dataBuffer(),
-                                message_receive_.getLength()),
-            [this](boost::system::error_code ec, std::size_t /*length*/)
-            {
-                if (!ec)
-                {
-                    // Data received
-                    std::string tmp;
-                    for(unsigned i = 0; i < message_receive_.getLength(); ++i)
-                    {
-                        tmp += message_receive_.dataBuffer()[i];
-                    }
-                    std::cout << "received message with length " <<
-                                 message_receive_.getLength() << std::endl;
+                            boost::asio::buffer(message_receive_.dataBuffer(),
+                                                message_receive_.getLength()),
+                            [this](boost::system::error_code ec, std::size_t /*length*/)
+    {
+        if (!ec)
+        {
+            // Data received
+            std::string tmp(message_receive_.dataBuffer(),
+                            message_receive_.getLength());
 
-                    wrapper_->deliverMessage(tmp, message_receive_.getType());
-                    do_read_header();
-                }
-                else
-                {
-                    // TODO: Drop
-                    std::cerr << "Error " << ec << std::endl;
-                    wrapper_->terminate();
-                }
-            });
+            wrapper_->deliverMessage(tmp, message_receive_.getType());
+            do_read_header();
+        }
+        else
+        {
+            wrapper_->terminate();
+        }
+    });
 }
 
 
@@ -123,26 +155,68 @@ void Client::do_write()
     boost::asio::async_write(socket_, boost::asio::buffer(msgBuffer_.front().
                              headerBuffer(), msgBuffer_.front().getLength() +
                              SocketMessage::HEADER_LENGTH),
-        [this](boost::system::error_code ec, std::size_t)
+                             [this](boost::system::error_code ec, std::size_t)
+    {
+        if (!ec)
         {
-          if (!ec)
-          {
-              std::lock_guard<std::mutex> guard(msgBufferMutex_);
-              std::cout << "sending message with length " << msgBuffer_.
-                           front().getLength() << std::endl;
+            // Reset timer if not HB ack message.
+            if(msgBuffer_.front().getType() != PROTOCOL_HBACK_MESSAGE)
+            {
+                resetTimer();
+            }
+
+            std::lock_guard<std::mutex> guard(msgBufferMutex_);
+            std::cout << "sending message with length " << msgBuffer_.
+                         front().getLength() << std::endl;
 
 
-              msgBuffer_.pop_front();
+            msgBuffer_.pop_front();
 
-              if (!msgBuffer_.empty())
-              {
-                  do_write();
-              }
-          }
-          else
-          {
-              std::cerr << "Error: writing to socket " << ec << std::endl;
-              wrapper_->terminate();
-          }
-        });
+            if (!msgBuffer_.empty())
+            {
+                do_write();
+            }
+        }
+        else
+        {
+            wrapper_->terminate();
+        }
+    });
+}
+
+void Client::HB_handler(const boost::system::error_code &code)
+{
+    if(code == boost::asio::error::operation_aborted)
+    {
+        // Ignored.
+    }
+    else if(timerState_ == IdleWait)
+    {
+        // Send heartbeat ack.
+        std::string tmp;
+        sendMessage(tmp, PROTOCOL_HBACK_MESSAGE);
+
+        // Reset timer to give client 60s to reply.
+        timer_.expires_from_now(boost::posix_time::seconds(60));
+        timer_.async_wait(std::bind(&Client::HB_handler, this,
+                                    std::placeholders::_1));
+        timerState_ = ResponseWait;
+        std::cout << "Timer reset to 60s." << std::endl;
+    }
+    else if(timerState_ == ResponseWait)
+    {
+        // If this expires, session is dead -> drop.
+        wrapper_->terminate();
+        std::cout << "Timer: end session." << std::endl;
+    }
+}
+
+void Client::resetTimer()
+{
+    // Set heartbeat ACK intervall to 15min.
+    timer_.expires_from_now(boost::posix_time::seconds(900));
+    timer_.async_wait(std::bind(&Client::HB_handler, this,
+                                std::placeholders::_1));
+
+    std::cout << "Timer reset to 15min." << std::endl;
 }

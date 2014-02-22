@@ -53,12 +53,14 @@ void ClientWrapper::deliverMessage(std::string& msg, uint32_t type)
                 std::string ack;
                 client_->sendMessage(ack, PROTOCOL_ACK_MESSAGE);
 
+                std::lock_guard<std::mutex> guard(libnetworkMutex_);
                 state_ = HandshakeComplete;
             }
             break;
         }
         case PROTOCOL_ACK_MESSAGE:
         {
+            std::lock_guard<std::mutex> guard(libnetworkMutex_);
             // Server acknowledged either the HelloRequest or DeviceList message.
             if(state_ == HelloRequest)
             {
@@ -94,10 +96,13 @@ void ClientWrapper::deliverMessage(std::string& msg, uint32_t type)
 
         case PROTOCOL_NORMAL_MESSAGE:
         {
-            if(state_ != HandshakeComplete)
             {
-                std::cout << "Sessions in server and client appear to be unsynced."
-                          << std::endl;
+                std::lock_guard<std::mutex> guard(libnetworkMutex_);
+                if(state_ != HandshakeComplete)
+                {
+                    std::cout << "Sessions in server and client appear to be unsynced."
+                              << std::endl;
+                }
             }
             auxilo::Message mesg;
             if(!mesg.ParseFromString(msg))
@@ -117,7 +122,7 @@ void ClientWrapper::deliverMessage(std::string& msg, uint32_t type)
                 }
 
                 // Otherwise store the message in buffer.
-                std::lock_guard<std::mutex> guard(msgDequeMutex_);
+                std::lock_guard<std::mutex> guard(libnetworkMutex_);
                 receivedMessages_.push_back(mesg);
             }
             break;
@@ -125,6 +130,7 @@ void ClientWrapper::deliverMessage(std::string& msg, uint32_t type)
         case PROTOCOL_FIN_MESSAGE:
         {
             std::cout << "Received terminate message." << std::endl;
+            std::lock_guard<std::mutex> guard(libnetworkMutex_);
             state_ = Finished;
             break;
         }
@@ -161,6 +167,7 @@ bool ClientWrapper::initiateConnection(std::string& customerID,
             initializer.SerializeToString(&mesg);
             client_->sendMessage(mesg, PROTOCOL_INIT_MESSAGE);
 
+            std::lock_guard<std::mutex> guard(libnetworkMutex_);
             state_ = HelloRequest;
 
             // Client now waits for a ACK from server.
@@ -170,21 +177,22 @@ bool ClientWrapper::initiateConnection(std::string& customerID,
         }
         catch(std::exception &e)
         {
-            std::cerr << e.what() << std::endl;
-            return false;
+            state_= Finished;
         }
     }
     else
     {
         // Can not initialize connection if already initialized.
-        return false;
+
     }
+    return false;
 }
 
 
 
 bool ClientWrapper::sendDeviceList(auxilo::DeviceList& msg)
 {
+    std::lock_guard<std::mutex> guard(libnetworkMutex_);
     if(state_ == HelloRequest || state_ == DeviceList)
     {
         std::string pntr;
@@ -198,11 +206,8 @@ bool ClientWrapper::sendDeviceList(auxilo::DeviceList& msg)
 
 bool ClientWrapper::sendMessage(auxilo::Message &msg)
 {
-    if(state_ == Finished)
-    {
-        throw "Server closed the connection. Receiving or sending not possible.";
-    }
-    else if(state_ == HandshakeComplete)
+    std::lock_guard<std::mutex> guard(libnetworkMutex_);
+    if(state_ == HandshakeComplete)
     {
         // Communication ready and messages can be sent to server.
         std::string pntr;
@@ -210,23 +215,14 @@ bool ClientWrapper::sendMessage(auxilo::Message &msg)
         client_->sendMessage(pntr, PROTOCOL_NORMAL_MESSAGE);
         return true;
     }
-    else
-    {
-        throw "Communication not ready for delivering messages.";
-    }
+    return false;
 }
-
 
 
 bool ClientWrapper::getLastMessage(auxilo::Message &msg)
 {
-    if(state_ == Finished)
-    {
-        throw "Server closed connection. Receiving or sending not possible.";
-    }
-    std::lock_guard<std::mutex> guard(msgDequeMutex_);
-
-    if ( receivedMessages_.empty() )
+    std::lock_guard<std::mutex> guard(libnetworkMutex_);
+    if(state_ == Finished || receivedMessages_.empty())
     {
         return false;
     }
@@ -249,10 +245,13 @@ void ClientWrapper::addObserver(ClientObserver *observer)
 
 bool ClientWrapper::connectionStatus ()
 {
-    return state_ == HelloRequest or state_ == DeviceList or state_ == HandshakeComplete;
+    std::lock_guard<std::mutex> guard(libnetworkMutex_);
+    return state_ == HelloRequest || state_ == DeviceList ||
+           state_ == HandshakeComplete;
 }
 
 void ClientWrapper::terminate()
 {
+    std::lock_guard<std::mutex> guard(libnetworkMutex_);
     state_ = Finished;
 }

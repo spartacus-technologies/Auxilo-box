@@ -8,6 +8,12 @@
 #include <mutex>
 #include <deque>
 
+enum timerState
+{
+    IdleWait,
+    ResponseWait,
+};
+
 class ClientWrapper;
 
 class Client
@@ -38,7 +44,19 @@ class Client
         // Assynchronically read data
         void do_read_data();
 
+        // Timer handler
+        void HB_handler(const boost::system::error_code &code);
+
+        // Reset timer
+        void resetTimer();
+
+        // Timer state
+        timerState timerState_;
+
         boost::asio::ip::tcp::socket socket_;
+
+        // Timer for heartbeat acks.
+        boost::asio::deadline_timer timer_;
 
         // For storing messages to be sent
         std::deque<SocketMessage> msgBuffer_;
