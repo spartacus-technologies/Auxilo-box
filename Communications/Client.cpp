@@ -13,8 +13,6 @@ Client::Client(boost::asio::io_service &io_service,
 Client::~Client()
 {
     std::cout << "Closing socket." << std::endl;
-    boost::system::error_code ignored_ec;
-    socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
 }
 
 void Client::do_connect(boost::asio::ip::tcp::resolver::iterator
@@ -36,6 +34,7 @@ void Client::do_connect(boost::asio::ip::tcp::resolver::iterator
         else
         {
             wrapper_->terminate();
+            socket_.close();
         }
     });
 }
@@ -95,8 +94,15 @@ void Client::do_read_header()
         }
         else
         {
-            std::cout << "Errors: " << ec << std::endl;
-            wrapper_->terminate();
+            if(ec == boost::asio::error::operation_aborted)
+            {
+                // Ignored. socket_.close() causes operation_aborted error.
+            }
+            else
+            {
+                wrapper_->terminate();
+                socket_.close();
+            }
         }
     });
 }
@@ -121,6 +127,7 @@ void Client::do_read_data()
         else
         {
             wrapper_->terminate();
+            socket_.close();
         }
     });
 }
@@ -166,8 +173,6 @@ void Client::do_write()
             }
 
             std::lock_guard<std::mutex> guard(msgBufferMutex_);
-            std::cout << "sending message with length " << msgBuffer_.
-                         front().getLength() << std::endl;
 
 
             msgBuffer_.pop_front();
@@ -179,7 +184,15 @@ void Client::do_write()
         }
         else
         {
-            wrapper_->terminate();
+            if(ec == boost::asio::error::operation_aborted)
+            {
+                // Ignored.
+            }
+            else
+            {
+                wrapper_->terminate();
+                socket_.close();
+            }
         }
     });
 }
@@ -207,6 +220,7 @@ void Client::HB_handler(const boost::system::error_code &code)
     {
         // If this expires, session is dead -> drop.
         wrapper_->terminate();
+        socket_.close();
         std::cout << "Timer: end session." << std::endl;
     }
 }
@@ -217,6 +231,4 @@ void Client::resetTimer()
     timer_.expires_from_now(boost::posix_time::seconds(900));
     timer_.async_wait(std::bind(&Client::HB_handler, this,
                                 std::placeholders::_1));
-
-    std::cout << "Timer reset to 15min." << std::endl;
 }
