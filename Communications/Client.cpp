@@ -13,6 +13,7 @@ Client::Client(boost::asio::io_service &io_service,
 Client::~Client()
 {
     std::cout << "Closing socket." << std::endl;
+    socket_.close();
 }
 
 void Client::do_connect(boost::asio::ip::tcp::resolver::iterator
@@ -34,7 +35,7 @@ void Client::do_connect(boost::asio::ip::tcp::resolver::iterator
         else
         {
             wrapper_->terminate();
-            socket_.close();
+            socket_.cancel();
         }
     });
 }
@@ -96,12 +97,12 @@ void Client::do_read_header()
         {
             if(ec == boost::asio::error::operation_aborted)
             {
-                // Ignored. socket_.close() causes operation_aborted error.
+                // Ignored. socket_.cancel() causes operation_aborted error.
             }
             else
             {
                 wrapper_->terminate();
-                socket_.close();
+                socket_.cancel();
             }
         }
     });
@@ -127,7 +128,7 @@ void Client::do_read_data()
         else
         {
             wrapper_->terminate();
-            socket_.close();
+            socket_.cancel();
         }
     });
 }
@@ -191,7 +192,7 @@ void Client::do_write()
             else
             {
                 wrapper_->terminate();
-                socket_.close();
+                socket_.cancel();
             }
         }
     });
@@ -220,7 +221,7 @@ void Client::HB_handler(const boost::system::error_code &code)
     {
         // If this expires, session is dead -> drop.
         wrapper_->terminate();
-        socket_.close();
+        socket_.cancel();
         std::cout << "Timer: end session." << std::endl;
     }
 }

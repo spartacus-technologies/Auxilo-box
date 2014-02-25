@@ -13,7 +13,7 @@ ClientWrapper::ClientWrapper(std::string ip, std::string port):
 ClientWrapper::~ClientWrapper()
 {
     // TODO Client_->end_session();
-
+    io_service_.stop();
     if( t_.joinable())
     {
         t_.join();
@@ -217,6 +217,7 @@ bool ClientWrapper::sendMessage(auxilo::Message &msg)
     }
     return false;
 }
+
 
 
 bool ClientWrapper::getLastMessage(auxilo::Message &msg)
