@@ -61,7 +61,7 @@ int main(int argc, char const *argv[])
     	if (pir != 0)
     	{
     		newDevice->set_type(auxilo::deviceType::sensorPIR);
-    		cout << "Uusi pir-anturi" << endl;
+    		cout << "New PIR added to deviceList" << endl;
     	}
     	else
     	{
@@ -70,7 +70,7 @@ int main(int argc, char const *argv[])
     		if ( therm != 0 )
     		{
     			newDevice->set_type(auxilo::deviceType::sensorTemp);
-    			cout << "Uusi lampotila-anturi" << endl;
+    			cout << "New thermometer added to deviceList" << endl;
     		}
     		else //unknown sensortype (unknown to protocol)
     			continue;
@@ -103,6 +103,7 @@ int main(int argc, char const *argv[])
     //------------------------------------------------------
 
 	int therm_check = THERM_CHECK_DELAY;
+	bool therm_checked = false;
 
 	//**********************
 	//		MAIN LOOP 
@@ -134,8 +135,9 @@ int main(int argc, char const *argv[])
 				// 	nexa->socketOn();
 				// }
 
-				cout << "PIR räjähti" << endl;
+				cout << data.read_time <<"   PIR detected movement" << endl;
 				writeLog(data.sensorID, data.read_time, 1);
+				continue;
 			}
 
 			Thermometer* therm = dynamic_cast<Thermometer*>( sensors.at(i) );
@@ -144,7 +146,7 @@ int main(int argc, char const *argv[])
 				if (data.isSuccessful)
 				{
 					//Data logiin talteen
-					cout << "Lampotila on " << data.value << " astetta." << endl;
+					cout << "Thermometer " << data.sensorID  << "  :   " << data.value << "C" << endl;
 
 					//KOMMUNIKAATION TESTAUSTA VARTEN!
 					//-------------------------------------
@@ -164,24 +166,30 @@ int main(int argc, char const *argv[])
 	   				//-------------------------------------
 
 	   				writeLog(data.sensorID, data.read_time, data.value);
-	   				therm_check = 0;
+	   				therm_checked = true;
+	   				continue;
 
 				}
 				else
 				{
-					cout << "Lampotilan tarkastaminen epaonnistui! :("<< endl;
+					cout << "Therm check failed!"<< endl;
 				}
 			}
-
-			++therm_check;
-
-			//-------------------------------------------------------------------------------
-
 		}
 
+		//Reset thermometertimer.
+		++therm_check;
+		if ( therm_checked )
+		{
+			therm_check = 0;
+			therm_checked = false;
+		}
+		
+
+		//Check if connection to server is lost
 		if ( !comm->communicationStatus() )
 		{
-			cout << "Yhteys katkesi" << endl;
+			cout << "Connection lost" << endl;
 			delete comm;
 			comm = new Communications();
 			
@@ -189,12 +197,11 @@ int main(int argc, char const *argv[])
 				continue;
 		}
 
-		//Read new messages
-		cout << "check mailbox" << endl;
+		//Read new messages recieved from the server.
 		auxilo::Message msg;
 		while ( comm->getMessage(msg) )
 		{
-			  cout << "new message!!!" << endl;
+			  cout << "New message recieved!" << endl;
 			  auxilo::Message ans;
 			  ans.set_senderdevicename(BOXID);
 			  ans.set_receiverdevicename(msg.senderdevicename());
@@ -216,7 +223,7 @@ int main(int argc, char const *argv[])
 
 			  			string sensorID = qry.sensorid();
 
-			  			cout << "SENSORID = " << sensorID << endl;
+			  			// cout << "SENSORID = " << sensorID << endl;
 
 			  			vector<std::string> sensor_values;
 
@@ -236,13 +243,13 @@ int main(int argc, char const *argv[])
 
 				   		string results = Help::readLastNLinesFromFile(LOGDIR + sensorID+LOGFILETYPE, line_count);
 				   		
-				   		cout << "Linecount = " << line_count << endl;
-				   		cout << "Result = " << results << endl;
+				   		// cout << "Linecount = " << line_count << endl;
+				   		// cout << "Sensor: " << sensorID << "   value = " << results << endl;
 
 				   		//Parse results and push them to the sensordatalist
 				   		while ( results.length() > 0 )
 				   		{
-				   			cout << "OLEN WHILESSÄ" << endl;
+				   			// cout << "OLEN WHILESSÄ" << endl;
 				   			//Get one line from string
 				   			unsigned delimeter_pos = results.find("\n");
 
@@ -264,13 +271,13 @@ int main(int argc, char const *argv[])
 				   			datamsg->set_hardwareid(sensorID);
 				   			datamsg->set_data(value);
 				   			datamsg->set_timestamp(date);
-				   			cout << "SENSORID = " << sensorID  << "    :    " << value << endl;
+				   			cout << "Sensor:" << sensorID  << "    value:    " << value << endl;
 				   		}
 
 			  		}
 
 			  		( *ans.mutable_sensordatalist() ) = sensordatalist;
-                    cout << "DATASIZE " << sensordatalist.sensordata_size() << endl;
+                    cout << "SensorDataList size " << sensordatalist.sensordata_size() << endl;
 
 			  }
 			  if ( msg.has_device_command() )
@@ -282,7 +289,7 @@ int main(int argc, char const *argv[])
 			  		auxilo::DeviceStatus ds;
 			  		ds.set_deviceid(devID);
 
-			  		cout << "HAKUAVAIN " <<  devID << endl;
+			  		cout << "DeviceID " <<  devID << endl;
 
 			  		//Find pointer to the device
 			  		std::map<std::string, Device*>::iterator devItr = devices.find(devID);

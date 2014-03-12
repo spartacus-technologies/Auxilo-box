@@ -112,7 +112,7 @@ auxilo::deviceState NexaPlug::getStatus() const
 
 std::string NexaPlug::getID() const
 {
-	std::cout << "NexaPlug::getID(): " << "NECAAAAAAA " + Help::intToStr(id_) <<"\n";
+	// std::cout << "NexaPlug::getID(): " << "NECAAAAAAA " + Help::intToStr(id_) <<"\n";
 	return "nexa " + Help::intToStr(id_);
 }
 
