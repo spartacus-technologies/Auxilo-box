@@ -146,7 +146,7 @@ int main(int argc, char const *argv[])
 				if (data.isSuccessful)
 				{
 					//Data logiin talteen
-					cout << "Thermometer " << data.sensorID  << "  :   " << data.value << "C" << endl;
+					cout << data.read_time << "    Thermometer " << data.sensorID  << "  :   " << data.value << "C" << endl;
 
 					//KOMMUNIKAATION TESTAUSTA VARTEN!
 					//-------------------------------------
